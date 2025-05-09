@@ -1,12 +1,16 @@
 #pragma once
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QInputDialog>
 #include <QList>
 #include <QPlainTextEdit>
 #include <QString>
+#include <QSet>
+#include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -28,7 +32,9 @@ public:
     explicit ElementBlock(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        roleSelector_->setEditable(true);
+        editRole_->setText("Edit");
+        addRole_->setText("Add"); // icons later
+        roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
 
         mainLayout_ = new QVBoxLayout(this);
@@ -36,11 +42,29 @@ public:
 
         // Set up layouts
         topLayout_ = new QHBoxLayout;
+        topLayout_->addWidget(editRole_, 0);
+        topLayout_->addWidget(addRole_, 0);
         topLayout_->addWidget(roleSelector_, 1);
         topLayout_->addWidget(eotSelector_, 0);
 
         mainLayout_->addLayout(topLayout_, 0);
         mainLayout_->addWidget(speechEdit_, 0);
+
+        connect
+        (
+            editRole_,
+            &QToolButton::clicked,
+            this,
+            &ElementBlock::onEditRoleClicked_
+        );
+
+        connect
+        (
+            addRole_,
+            &QToolButton::clicked,
+            this,
+            &ElementBlock::onAddRoleClicked_
+        );
     }
 
     virtual ~ElementBlock() override
@@ -87,4 +111,49 @@ private:
     QComboBox* roleSelector_ = new QComboBox(this);
     QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
     QCheckBox* eotSelector_ = new QCheckBox(this);
+
+    QToolButton* editRole_ = new QToolButton(this);
+    QToolButton* addRole_ = new QToolButton(this);
+
+    QSet<QString> itemTexts() const
+    {
+        QSet<QString> texts{};
+
+        for (auto i = 0; roleSelector_->count(); ++i)
+            texts << roleSelector_->itemText(i);
+
+        return texts;
+    }
+
+private slots:
+    void onEditRoleClicked_()
+    {
+        auto now = QInputDialog::getText
+        (
+            this,
+            qApp->applicationName(),
+            "Edit Role",
+            QLineEdit::Normal,
+            roleSelector_->currentText()
+        );
+
+        if (now.isEmpty() || itemTexts().contains(now)) return;
+
+        // emit signal and set text, or vice versa...
+    }
+
+    void onAddRoleClicked_()
+    {
+        auto now = QInputDialog::getText
+        (
+            this,
+            qApp->applicationName(),
+            "Add Role",
+            QLineEdit::Normal
+        );
+
+        if (now.isEmpty() || itemTexts().contains(now)) return;
+
+        // emit signal and set text, or vice versa...
+    }
 };
