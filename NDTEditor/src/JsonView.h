@@ -42,6 +42,7 @@ public:
     {
         auto block = new ElementBlock(scrollAreaContainer_);
 
+        block->setRoles(roles_);
         block->setRole(role);
         block->setSpeech(speech);
         block->setEot(eot);
@@ -74,7 +75,6 @@ public:
     {
         roles_ = { roles.begin(), roles.end() };
         sortRoles_();
-        qDebug() << roles_; /// Good
         updateElementsRoles_();
     }
 

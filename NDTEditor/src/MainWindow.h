@@ -106,7 +106,6 @@ private slots:
         // Create new blocks for each element in the model
 
         jsonView_->clear();
-        qDebug() << jsonModel_->roles(); /// Good
         jsonView_->setRoles(jsonModel_->roles());
 
         for (auto& element : jsonModel_->elements())
