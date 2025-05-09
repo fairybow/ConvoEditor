@@ -47,7 +47,7 @@ public:
         file.close();
 
         QJsonParseError error{};
-        auto docuemnt = QJsonDocument::fromJson(string.toUtf8(), &error);
+        auto document = QJsonDocument::fromJson(string.toUtf8(), &error);
 
         if (error.error != QJsonParseError::NoError)
         {
@@ -56,11 +56,24 @@ public:
         }
 
         // No errors, so loading will proceed
-        document_ = docuemnt;
-        parse_();
-        emit loaded();
-        
-        return true;
+        QJsonDocument old_document = document_;
+        QList<Element> old_elements = elements_;
+        QSet<QString> old_roles = roles_;
+
+        if (parse_(document))
+        {
+            emit loaded();
+            return true;
+        }
+        else
+        {
+            //qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
+            qWarning() << "JSON format is incorrect.";
+            document_ = old_document;
+            elements_ = old_elements;
+            roles_ = old_roles;
+            return false;
+        }
     }
 
     QJsonDocument document() const
@@ -78,11 +91,46 @@ public:
         return roles_;
     }
 
-    /*void addRole(const QString& role)
+    void replaceRole(const QString& from, const QString& to)
     {
-        roles_ << role;
-        //emit rolesChanged();
-    }*/
+        // Update JSON
+        auto root = document_.object();
+        auto array = root["results"].toArray();
+
+        // We need to use an index-based loop because we're modifying elements
+        for (auto i = 0; i < array.size(); ++i)
+        {
+            if (!array[i].isObject()) continue;
+
+            // Get object, modify if needed, then replace in array
+            auto obj = array[i].toObject();
+
+            if (obj[ROLE_KEY].toString() == from)
+            {
+                obj[ROLE_KEY] = to;
+                array[i] = obj;
+            }
+        }
+
+        // Update the root object with our modified array
+        root["results"] = array;
+        document_.setObject(root);
+
+        // Update elements
+        for (auto& element : elements_)
+            if (element.role == from)
+                element.role = to;
+
+        // Update roles
+        if (roles_.contains(from))
+        {
+            roles_.remove(from);
+            roles_.insert(to);
+
+            // If we want to emit a signal about roles changing. Unsure if needed...
+            // emit rolesChanged();
+        }
+    }
 
 signals:
     void loaded();
@@ -90,6 +138,8 @@ signals:
     // element at index adjusted/removed/added (impl later)
 
 private:
+    // We want to preserve JSON structure, and it might be easiest to just
+    // ensure we make all edits to data synchronized
     static constexpr auto ROLE_KEY = "Role";
     static constexpr auto SPEECH_KEY = "Content";
     static constexpr auto EOT_KEY = "EndOfTurn";
@@ -97,26 +147,28 @@ private:
     QList<Element> elements_{};
     QSet<QString> roles_{};
 
-    void parse_()
+/*    static constexpr auto EXPECTED = R"(
+{
+    "results": [
+        {
+            "Role": "Speaker 0",
+            "Content" : "Hello. How are you?",
+            "EndOfTurn" : true
+        },
+        {
+            "Role": "Speaker 1",
+            "Content" : "Hi, um",
+            "EndOfTurn" : false
+        }
+    ]
+}";
+)";*/
+
+    bool parse_(const QJsonDocument& document)
     {
+        document_ = document;
         elements_.clear();
         roles_.clear();
-
-        // This is our expected structure:
-        //{
-        //    "results": [
-        //        {
-        //            "Role": "Speaker 0",
-        //            "Content" : "Hello. How are you?",
-        //            "EndOfTurn" : true
-        //        },
-        //        {
-        //            "Role": "Speaker 1",
-        //            "Content" : "Hi, um",
-        //            "EndOfTurn" : false
-        //        }
-        //    ]
-        //}
 
         if (document_.isObject())
         {
@@ -130,9 +182,13 @@ private:
                 elements_ << element;
                 roles_ << element.role;
             }
+
+            return true;
         }
 
-        // Don't need a rolesChanged emission here, since this is only called on
+        return false;
+
+        // Don't need a rolesChanged emission, since this is only called on
         // model load, implying fresh view with no need to receive this signal
         // yet
     }

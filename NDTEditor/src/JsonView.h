@@ -91,7 +91,7 @@ public:
 
 signals:
     void roleChanged(const QString& from, const QString& to);
-    void roleAdded(const QString& role);
+    // Role added doesn't really need to inform the model
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;
@@ -149,7 +149,5 @@ private slots:
                 block->setRole(current);
             }
         }
-
-        emit roleAdded(role);
     }
 };

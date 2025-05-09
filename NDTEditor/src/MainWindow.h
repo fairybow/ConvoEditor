@@ -46,15 +46,11 @@ public:
             jsonView_,
             &JsonView::roleChanged,
             this,
-            &MainWindow::onJsonViewRoleChanged_
-        );
-
-        connect
-        (
-            jsonView_,
-            &JsonView::roleAdded,
-            this,
-            &MainWindow::onJsonViewRoleAdded_
+            [&](const QString& from, const QString& to)
+            {
+                jsonModel_->replaceRole(from, to);
+                qDebug() << jsonModel_->document();
+            }
         );
     }
 
@@ -125,15 +121,5 @@ private slots:
                 element.eot
             );
         }
-    }
-
-    void onJsonViewRoleChanged_(const QString& from, const QString& to)
-    {
-        //...
-    }
-
-    void onJsonViewRoleAdded_(const QString& role)
-    {
-        //...
     }
 };
