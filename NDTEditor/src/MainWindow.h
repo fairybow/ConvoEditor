@@ -89,5 +89,20 @@ private slots:
 
         // Clear View blocks
         // Create new blocks for each element in the model
+
+        jsonView_->clear();
+
+        qDebug() << "cleared";
+        qDebug() << jsonModel_->elements().isEmpty(); // this is incorrectly empty
+
+        for (auto& element : jsonModel_->elements())
+        {
+            jsonView_->add
+            (
+                element.role,
+                element.text,
+                element.eot
+            );
+        }
     }
 };

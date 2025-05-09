@@ -67,8 +67,14 @@ public:
         return document_;
     }
 
+    const QList<Element>& elements() const
+    {
+        return elements_;
+    }
+
 signals:
     void loaded();
+    // element adjusted/removed/added
 
 private:
     QJsonDocument document_{};
@@ -78,15 +84,31 @@ private:
     {
         elements_.clear();
 
+        // This is our expected structure:
+        //{
+        //    "results": [
+        //        {
+        //            "Role": "Speaker 0",
+        //            "Content" : "Hello. How are you?",
+        //            "EndOfTurn" : true
+        //        },
+        //        {
+        //            "Role": "Speaker 1",
+        //            "Content" : "Hi, um",
+        //            "EndOfTurn" : false
+        //        }
+        //    ]
+        //}
+
         if (document_.isObject())
         {
             auto root = document_.object();
-            auto array = root["elements"].toArray();
+            auto array = root["elements"].toObject().value("results").toArray();
 
             for (const auto& value : array)
             {
                 if (!value.isObject()) continue;
-                elements_ << toElement_(value);
+                elements_ << toElement_(value); // <- this is not being reached
             }
         }
     }
@@ -99,6 +121,8 @@ private:
         element.role = obj["Role"].toString();
         element.text = obj["Text"].toString();
         element.eot = obj["EndOfTurn"].toBool();
+
+        qDebug() << "Element added:" << element.role << element.text << element.eot;
 
         return element;
     }

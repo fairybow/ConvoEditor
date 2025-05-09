@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QLayoutItem>
 #include <QList>
 #include <QScrollArea>
 #include <QVBoxLayout>
@@ -31,13 +32,32 @@ public:
 
         // Set up main layout
         mainLayout_->addWidget(scrollArea_);
+    }
 
-        /// Testing:
+    void add(const QString& role, const QString& text, bool eot)
+    {
+        auto block = new ElementBlock(scrollAreaContainer_);
 
-        //scrollAreaLayout_->addWidget(new ElementBlock(this));
-        //scrollAreaLayout_->addWidget(new ElementBlock(this));
-        //scrollAreaLayout_->addWidget(new ElementBlock(this));
-        //scrollAreaLayout_->addWidget(new ElementBlock(this));
+        block->setRole(role);
+        block->setText(text);
+        block->setEot(eot);
+
+        scrollAreaLayout_->addWidget(block);
+
+        qDebug() << "widget theoretically added";
+    }
+
+    void clear()
+    {
+        QLayoutItem* item = nullptr;
+
+        while ((item = scrollAreaLayout_->takeAt(0)) != nullptr)
+        {
+            if (auto widget = item->widget())
+                delete widget;
+
+            delete item;
+        }
     }
 
 private:
