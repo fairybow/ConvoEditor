@@ -17,18 +17,18 @@ public:
     explicit ElementBlock(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        speechTextView_->setAcceptDrops(false);
+        speechEdit_->setAcceptDrops(false);
 
         mainLayout_ = new QVBoxLayout(this);
         //mainLayout_->setContentsMargins(0, 0, 0, 0);
 
         // Set up layouts
-        contentLayout_ = new QHBoxLayout;
-        contentLayout_->addWidget(speechTextView_, 1);
-        contentLayout_->addWidget(eotSelector_, 0);
+        topLayout_ = new QHBoxLayout;
+        topLayout_->addWidget(roleSelector_, 1);
+        topLayout_->addWidget(eotSelector_, 0);
 
-        mainLayout_->addWidget(roleSelector_, 0);
-        mainLayout_->addLayout(contentLayout_, 1);
+        mainLayout_->addLayout(topLayout_, 0);
+        mainLayout_->addWidget(speechEdit_, 0);
     }
 
     virtual ~ElementBlock() override
@@ -43,7 +43,7 @@ public:
 
     void setSpeech(const QString& speech)
     {
-        speechTextView_->setPlainText(speech);
+        speechEdit_->setPlainText(speech);
     }
 
     void setEot(bool eot)
@@ -53,10 +53,10 @@ public:
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;
-    QHBoxLayout* contentLayout_ = nullptr;
+    QHBoxLayout* topLayout_ = nullptr;
 
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
-    QPlainTextEdit* speechTextView_ = new QPlainTextEdit(this);
+    QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
     QCheckBox* eotSelector_ = new QCheckBox(this);
 };
