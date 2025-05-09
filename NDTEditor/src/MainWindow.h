@@ -41,13 +41,21 @@ public:
             &MainWindow::onJsonModelLoaded_
         );
 
-        /*connect
+        connect
         (
-            jsonModel_,
-            &JsonModel::rolesChanged,
+            jsonView_,
+            &JsonView::roleChanged,
             this,
-            &MainWindow::onJsonModelRolesChanged_
-        );*/
+            &MainWindow::onJsonViewRoleChanged_
+        );
+
+        connect
+        (
+            jsonView_,
+            &JsonView::roleAdded,
+            this,
+            &MainWindow::onJsonViewRoleAdded_
+        );
     }
 
 protected:
@@ -119,8 +127,13 @@ private slots:
         }
     }
 
-    /*void onJsonModelRolesChanged_()
+    void onJsonViewRoleChanged_(const QString& from, const QString& to)
     {
+        //...
+    }
 
-    }*/
+    void onJsonViewRoleAdded_(const QString& role)
+    {
+        //...
+    }
 };

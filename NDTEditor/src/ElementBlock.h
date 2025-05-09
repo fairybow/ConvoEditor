@@ -91,6 +91,7 @@ public:
     }
 
 signals:
+    // Current role changed, to pass to view, which will pass it to present (main window), which will edit the model lol
     void roleChanged(const QString& from, const QString& to);
     void roleAdded(const QString& role);
 

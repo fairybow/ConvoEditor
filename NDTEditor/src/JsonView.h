@@ -89,6 +89,10 @@ public:
                 block->setRoles(roles_);
     }
 
+signals:
+    void roleChanged(const QString& from, const QString& to);
+    void roleAdded(const QString& role);
+
 private:
     QVBoxLayout* mainLayout_ = nullptr;
     QVBoxLayout* scrollAreaLayout_ = nullptr;
@@ -126,6 +130,8 @@ private slots:
                 block->setRole((current == from) ? to : current);
             }
         }
+
+        emit roleChanged(from, to);
     }
 
     void onElementBlockRoleAdded_(const QString& role)
@@ -143,5 +149,7 @@ private slots:
                 block->setRole(current);
             }
         }
+
+        emit roleAdded(role);
     }
 };
