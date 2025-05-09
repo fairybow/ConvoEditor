@@ -10,6 +10,17 @@
 #include "JsonModel.h"
 #include "JsonView.h"
 
+/// When will roles change?
+/// On load:
+/// No signal needed. All roles will be set when the model is made and thus
+/// available to all the initial combo boxes
+/// 
+/// When text in a combo box is changed:
+/// In which case, we should signal the change. The element block signals to the
+/// view, which then must...
+/// 
+/// Any other time? I don't believe so
+
 // Functions as our Presenter
 class MainWindow : public QMainWindow
 {
@@ -22,7 +33,6 @@ public:
         setAcceptDrops(true);
         setCentralWidget(jsonView_);
 
-        // Connect model's reset signal to update view
         connect
         (
             jsonModel_,
@@ -30,6 +40,14 @@ public:
             this,
             &MainWindow::onJsonModelLoaded_
         );
+
+        /*connect
+        (
+            jsonModel_,
+            &JsonModel::rolesChanged,
+            this,
+            &MainWindow::onJsonModelRolesChanged_
+        );*/
     }
 
 protected:
@@ -88,6 +106,8 @@ private slots:
         // Create new blocks for each element in the model
 
         jsonView_->clear();
+        qDebug() << jsonModel_->roles(); /// Good
+        jsonView_->setRoles(jsonModel_->roles());
 
         for (auto& element : jsonModel_->elements())
         {
@@ -99,4 +119,9 @@ private slots:
             );
         }
     }
+
+    /*void onJsonModelRolesChanged_()
+    {
+
+    }*/
 };

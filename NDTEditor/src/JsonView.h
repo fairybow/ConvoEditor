@@ -1,8 +1,12 @@
 #pragma once
 
+#include <algorithm>
+
 #include <QLayoutItem>
 #include <QList>
 #include <QScrollArea>
+#include <QSet>
+#include <QString>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -43,6 +47,14 @@ public:
         block->setEot(eot);
 
         scrollAreaLayout_->addWidget(block);
+
+        connect
+        (
+            block,
+            &ElementBlock::roleChanged,
+            this,
+            &JsonView::onElementBlockRoleChanged_
+        );
     }
 
     void clear()
@@ -58,6 +70,14 @@ public:
         }
     }
 
+    void setRoles(const QSet<QString>& roles)
+    {
+        roles_ = { roles.begin(), roles.end() };
+        sortRoles_();
+        qDebug() << roles_; /// Good
+        updateElementsRoles_();
+    }
+
 private:
     QVBoxLayout* mainLayout_ = nullptr;
     QVBoxLayout* scrollAreaLayout_ = nullptr;
@@ -66,4 +86,42 @@ private:
     QWidget* scrollAreaContainer_ = new QWidget(scrollArea_);
     
     //QList<ElementBlock*> elementBlocks_{}; // widgets, not logic
+    QList<QString> roles_{};
+
+    void sortRoles_()
+    {
+        std::sort(roles_.begin(), roles_.end());
+    }
+
+    void updateElementsRoles_()
+    {
+        // Update all existing blocks
+        for (auto i = 0; i < scrollAreaLayout_->count(); ++i)
+        {
+            if (auto block = elementAt_(i))
+                block->setRoles(roles_);
+
+            // do we store choices here? how to do we do this?
+        }
+    }
+
+    ElementBlock* elementAt_(int index) const
+    {
+        auto item = scrollAreaLayout_->itemAt(index);
+        return qobject_cast<ElementBlock*>(item->widget());
+    }
+
+private slots:
+    void onElementBlockRoleChanged_(const QString& from, const QString& to)
+    {
+        // find the "from" text in our list and change it, then update the
+        // comboboxes. any combobox that was set to "from" needs to be set to
+        // "to"
+
+        roles_.removeAll(from);
+        roles_ << to;
+        sortRoles_();
+
+        //...
+    }
 };

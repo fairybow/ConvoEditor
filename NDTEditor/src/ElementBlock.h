@@ -3,11 +3,12 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
-#include <QPlainTextEdit>
-#include <QWidget>
-#include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QList>
+#include <QPlainTextEdit>
 #include <QString>
+#include <QVBoxLayout>
+#include <QWidget>
 
 class ElementBlock : public QWidget
 {
@@ -17,6 +18,7 @@ public:
     explicit ElementBlock(QWidget* parent = nullptr)
         : QWidget(parent)
     {
+        roleSelector_->setEditable(true);
         speechEdit_->setAcceptDrops(false);
 
         mainLayout_ = new QVBoxLayout(this);
@@ -38,7 +40,7 @@ public:
 
     void setRole(const QString& role)
     {
-        // Find or add?
+        roleSelector_->setCurrentText(role);
     }
 
     void setSpeech(const QString& speech)
@@ -50,6 +52,22 @@ public:
     {
         eotSelector_->setChecked(eot);
     }
+
+    QString role() const
+    {
+        return roleSelector_->currentText();
+    }
+
+    void setRoles(const QList<QString>& roles)
+    {
+        roleSelector_->clear();
+
+        for (auto& role : roles)
+            roleSelector_->addItem(role);
+    }
+
+signals:
+    void roleChanged(const QString& from, const QString& to);
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;

@@ -8,6 +8,7 @@
 #include <QJsonValueRef>
 #include <QList>
 #include <QObject>
+#include <QSet>
 #include <QString>
 #include <QTextStream>
 
@@ -72,9 +73,21 @@ public:
         return elements_;
     }
 
+    const QSet<QString>& roles() const
+    {
+        return roles_;
+    }
+
+    /*void addRole(const QString& role)
+    {
+        roles_ << role;
+        //emit rolesChanged();
+    }*/
+
 signals:
     void loaded();
-    // element adjusted/removed/added
+    //void rolesChanged();
+    // element at index adjusted/removed/added (impl later)
 
 private:
     static constexpr auto ROLE_KEY = "Role";
@@ -82,10 +95,12 @@ private:
     static constexpr auto EOT_KEY = "EndOfTurn";
     QJsonDocument document_{};
     QList<Element> elements_{};
+    QSet<QString> roles_{};
 
     void parse_()
     {
         elements_.clear();
+        roles_.clear();
 
         // This is our expected structure:
         //{
@@ -111,9 +126,15 @@ private:
             for (const auto& value : array)
             {
                 if (!value.isObject()) continue;
-                elements_ << toElement_(value);
+                auto element = toElement_(value);
+                elements_ << element;
+                roles_ << element.role;
             }
         }
+
+        // Don't need a rolesChanged emission here, since this is only called on
+        // model load, implying fresh view with no need to receive this signal
+        // yet
     }
 
     Element toElement_(const QJsonValueRef& value)
