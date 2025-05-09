@@ -44,11 +44,22 @@ public:
         connect
         (
             jsonView_,
-            &JsonView::roleChanged,
+            &JsonView::roleChangeRequested,
             this,
             [&](const QString& from, const QString& to)
             {
                 jsonModel_->replaceRole(from, to);
+            }
+        );
+
+        connect
+        (
+            jsonView_,
+            &JsonView::roleAddRequested,
+            this,
+            [&](const QString& role)
+            {
+                jsonModel_->addRole(role);
             }
         );
     }

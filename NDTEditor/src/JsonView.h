@@ -12,6 +12,13 @@
 
 #include "ElementBlock.h"
 
+/// Next:
+/// Changing combo boxes, speech edit, eot check values needs to update the model.
+/// However, when does it really need to do this? Do we really need a full
+/// model, given that these widgets (the text edit, check box, and combo box)
+/// hold state? It's there for us when we need it in the view, so what should we
+/// do?
+
 class JsonView : public QWidget
 {
     Q_OBJECT
@@ -52,17 +59,17 @@ public:
         connect
         (
             block,
-            &ElementBlock::roleChanged,
+            &ElementBlock::roleChangeRequested,
             this,
-            &JsonView::onElementBlockRoleChanged_
+            &JsonView::onElementBlockRoleChangeRequested_
         );
 
         connect
         (
             block,
-            &ElementBlock::roleAdded,
+            &ElementBlock::roleAddRequested,
             this,
-            &JsonView::onElementBlockRoleAdded_
+            &JsonView::onElementBlockRoleAddRequested_
         );
     }
 
@@ -90,8 +97,8 @@ public:
     }
 
 signals:
-    void roleChanged(const QString& from, const QString& to);
-    // Role added doesn't really need to inform the model
+    void roleChangeRequested(const QString& from, const QString& to);
+    void roleAddRequested(const QString& role);
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;
@@ -114,7 +121,7 @@ private:
     }
 
 private slots:
-    void onElementBlockRoleChanged_(const QString& from, const QString& to)
+    void onElementBlockRoleChangeRequested_(const QString& from, const QString& to)
     {
         roles_.removeAll(from);
         roles_ << to;
@@ -131,10 +138,10 @@ private slots:
             }
         }
 
-        emit roleChanged(from, to);
+        emit roleChangeRequested(from, to);
     }
 
-    void onElementBlockRoleAdded_(const QString& role)
+    void onElementBlockRoleAddRequested_(const QString& role)
     {
         roles_ << role;
         sortRoles_();
@@ -149,5 +156,7 @@ private slots:
                 block->setRole(current);
             }
         }
+
+        emit roleAddRequested(role);
     }
 };

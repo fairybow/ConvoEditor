@@ -68,7 +68,6 @@ public:
         else
         {
             qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
-            //qWarning() << "JSON format is incorrect.";
             document_ = old_document;
             elements_ = old_elements;
             roles_ = old_roles;
@@ -89,6 +88,11 @@ public:
     const QSet<QString>& roles() const
     {
         return roles_;
+    }
+
+    void addRole(const QString& role)
+    {
+        roles_ << role;
     }
 
     void replaceRole(const QString& from, const QString& to)

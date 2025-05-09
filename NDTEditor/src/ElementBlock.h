@@ -92,8 +92,8 @@ public:
 
 signals:
     // Current role changed, to pass to view, which will pass it to present (main window), which will edit the model lol
-    void roleChanged(const QString& from, const QString& to);
-    void roleAdded(const QString& role);
+    void roleChangeRequested(const QString& from, const QString& to);
+    void roleAddRequested(const QString& role);
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;
@@ -131,7 +131,7 @@ private slots:
 
         if (now.isEmpty() || itemTexts().contains(now)) return;
 
-        emit roleChanged(roleSelector_->currentText(), now);
+        emit roleChangeRequested(roleSelector_->currentText(), now);
     }
 
     void onAddRoleClicked_()
@@ -146,6 +146,6 @@ private slots:
 
         if (role.isEmpty() || itemTexts().contains(role)) return;
 
-        emit roleAdded(role);
+        emit roleAddRequested(role);
     }
 };
