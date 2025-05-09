@@ -120,7 +120,7 @@ private:
     {
         QSet<QString> texts{};
 
-        for (auto i = 0; roleSelector_->count(); ++i)
+        for (auto i = 0; i < roleSelector_->count(); ++i)
             texts << roleSelector_->itemText(i);
 
         return texts;
@@ -136,7 +136,7 @@ private slots:
             "Edit Role",
             QLineEdit::Normal,
             roleSelector_->currentText()
-        );
+        ).trimmed();
 
         if (now.isEmpty() || itemTexts().contains(now)) return;
 
@@ -153,7 +153,7 @@ private slots:
             qApp->applicationName(),
             "Add Role",
             QLineEdit::Normal
-        );
+        ).trimmed();
 
         if (role.isEmpty() || itemTexts().contains(role)) return;
 

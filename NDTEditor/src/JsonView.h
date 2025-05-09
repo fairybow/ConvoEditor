@@ -79,11 +79,14 @@ public:
         }
     }
 
-    void setRoles(const QSet<QString>& roles)
+    void initRoles(const QSet<QString>& roles)
     {
         roles_ = { roles.begin(), roles.end() };
         sortRoles_();
-        updateElementsRoles_();
+
+        for (auto i = 0; i < scrollAreaLayout_->count(); ++i)
+            if (auto block = elementAt_(i))
+                block->setRoles(roles_);
     }
 
 private:
@@ -99,18 +102,6 @@ private:
     void sortRoles_()
     {
         std::sort(roles_.begin(), roles_.end());
-    }
-
-    void updateElementsRoles_()
-    {
-        // Update all existing blocks
-        for (auto i = 0; i < scrollAreaLayout_->count(); ++i)
-        {
-            if (auto block = elementAt_(i))
-                block->setRoles(roles_);
-
-            // do we store choices here? how to do we do this?
-        }
     }
 
     ElementBlock* elementAt_(int index) const
@@ -139,5 +130,15 @@ private slots:
         sortRoles_();
 
         // Update all elements (all elements will remember current selection)
+
+        for (auto i = 0; i < scrollAreaLayout_->count(); ++i)
+        {
+            if (auto block = elementAt_(i))
+            {
+                auto current = block->role();
+                block->setRoles(roles_);
+                block->setRole(current);
+            }
+        }
     }
 };

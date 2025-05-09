@@ -106,7 +106,7 @@ private slots:
         // Create new blocks for each element in the model
 
         jsonView_->clear();
-        jsonView_->setRoles(jsonModel_->roles());
+        jsonView_->initRoles(jsonModel_->roles());
 
         for (auto& element : jsonModel_->elements())
         {
