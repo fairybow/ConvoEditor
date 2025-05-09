@@ -15,6 +15,8 @@ public:
     explicit ElementBlock(QWidget* parent = nullptr)
         : QWidget(parent)
     {
+        speechText_->setAcceptDrops(false);
+
         mainLayout_ = new QVBoxLayout(this);
         //mainLayout_->setContentsMargins(0, 0, 0, 0);
 
