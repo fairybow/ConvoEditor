@@ -95,8 +95,7 @@ private:
     
     QScrollArea* scrollArea_ = new QScrollArea(this);
     QWidget* scrollAreaContainer_ = new QWidget(scrollArea_);
-    
-    //QList<ElementBlock*> elementBlocks_{}; // widgets, not logic
+
     QList<QString> roles_{};
 
     void sortRoles_()
@@ -113,15 +112,20 @@ private:
 private slots:
     void onElementBlockRoleChanged_(const QString& from, const QString& to)
     {
-        // find the "from" text in our list and change it, then update the
-        // comboboxes. any combobox that was set to "from" needs to be set to
-        // "to". all other elements will remember selection.
-
         roles_.removeAll(from);
         roles_ << to;
         sortRoles_();
 
-        //...
+        for (auto i = 0; i < scrollAreaLayout_->count(); ++i)
+        {
+            if (auto block = elementAt_(i))
+            {
+                // Recall current selection
+                auto current = block->role();
+                block->setRoles(roles_);
+                block->setRole((current == from) ? to : current);
+            }
+        }
     }
 
     void onElementBlockRoleAdded_(const QString& role)
@@ -129,12 +133,11 @@ private slots:
         roles_ << role;
         sortRoles_();
 
-        // Update all elements (all elements will remember current selection)
-
         for (auto i = 0; i < scrollAreaLayout_->count(); ++i)
         {
             if (auto block = elementAt_(i))
             {
+                // Recall current selection
                 auto current = block->role();
                 block->setRoles(roles_);
                 block->setRole(current);
