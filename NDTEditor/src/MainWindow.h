@@ -49,7 +49,6 @@ public:
             [&](const QString& from, const QString& to)
             {
                 jsonModel_->replaceRole(from, to);
-                qDebug() << jsonModel_->document();
             }
         );
     }
