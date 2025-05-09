@@ -102,6 +102,7 @@ public:
 
 signals:
     void roleChanged(const QString& from, const QString& to);
+    void roleAdded(const QString& role);
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;
@@ -139,12 +140,14 @@ private slots:
 
         if (now.isEmpty() || itemTexts().contains(now)) return;
 
+        auto old = roleSelector_->currentText();
+
         // emit signal and set text, or vice versa...
     }
 
     void onAddRoleClicked_()
     {
-        auto now = QInputDialog::getText
+        auto role = QInputDialog::getText
         (
             this,
             qApp->applicationName(),
@@ -152,8 +155,8 @@ private slots:
             QLineEdit::Normal
         );
 
-        if (now.isEmpty() || itemTexts().contains(now)) return;
+        if (role.isEmpty() || itemTexts().contains(role)) return;
 
-        // emit signal and set text, or vice versa...
+        emit roleAdded(role);
     }
 };

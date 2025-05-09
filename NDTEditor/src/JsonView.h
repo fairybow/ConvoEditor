@@ -56,6 +56,14 @@ public:
             this,
             &JsonView::onElementBlockRoleChanged_
         );
+
+        connect
+        (
+            block,
+            &ElementBlock::roleAdded,
+            this,
+            &JsonView::onElementBlockRoleAdded_
+        );
     }
 
     void clear()
@@ -116,12 +124,20 @@ private slots:
     {
         // find the "from" text in our list and change it, then update the
         // comboboxes. any combobox that was set to "from" needs to be set to
-        // "to"
+        // "to". all other elements will remember selection.
 
         roles_.removeAll(from);
         roles_ << to;
         sortRoles_();
 
         //...
+    }
+
+    void onElementBlockRoleAdded_(const QString& role)
+    {
+        roles_ << role;
+        sortRoles_();
+
+        // Update all elements (all elements will remember current selection)
     }
 };
