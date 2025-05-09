@@ -3,13 +3,14 @@
 #include <QMainWindow>
 
 #include "JsonView.h"
+#include "JsonModel.h"
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = nullptr)
+    explicit MainWindow(QWidget* parent = nullptr)
         : QMainWindow(parent)
     {
         setCentralWidget(jsonView_);
@@ -17,5 +18,5 @@ public:
 
 private:
     JsonView* jsonView_ = new JsonView(this);
-    // Model (later)
+    JsonModel* jsonModel_ = new JsonModel(this);
 };

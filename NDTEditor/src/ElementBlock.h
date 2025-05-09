@@ -12,7 +12,7 @@ class ElementBlock : public QWidget
     Q_OBJECT
 
 public:
-    ElementBlock(QWidget* parent = nullptr)
+    explicit ElementBlock(QWidget* parent = nullptr)
         : QWidget(parent)
     {
         mainLayout_ = new QVBoxLayout(this);

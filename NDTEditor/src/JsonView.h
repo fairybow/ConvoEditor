@@ -12,7 +12,7 @@ class JsonView : public QWidget
     Q_OBJECT
 
 public:
-    JsonView(QWidget* parent = nullptr)
+    explicit JsonView(QWidget* parent = nullptr)
         : QWidget(parent)
     {
         mainLayout_ = new QVBoxLayout(this);
@@ -47,5 +47,5 @@ private:
     QScrollArea* scrollArea_ = new QScrollArea(this);
     QWidget* scrollAreaContainer_ = new QWidget(scrollArea_);
     
-    QList<ElementBlock*> elementBlocks_{};
+    //QList<ElementBlock*> elementBlocks_{}; // widgets, not logic
 };

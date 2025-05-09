@@ -28,7 +28,7 @@
     <QtMoc Include="src\ElementBlock.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\JsonModel.h" />
+    <QtMoc Include="src\JsonModel.h" />
     <QtMoc Include="src\MainWindow.h" />
     <QtMoc Include="src\JsonView.h" />
   </ItemGroup>
