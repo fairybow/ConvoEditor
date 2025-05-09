@@ -67,8 +67,8 @@ public:
         }
         else
         {
-            //qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
-            qWarning() << "JSON format is incorrect.";
+            qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
+            //qWarning() << "JSON format is incorrect.";
             document_ = old_document;
             elements_ = old_elements;
             roles_ = old_roles;
@@ -147,7 +147,7 @@ private:
     QList<Element> elements_{};
     QSet<QString> roles_{};
 
-/*    static constexpr auto EXPECTED = R"(
+    static constexpr auto EXPECTED = R"(
 {
     "results": [
         {
@@ -161,8 +161,8 @@ private:
             "EndOfTurn" : false
         }
     ]
-}";
-)";*/
+}
+)";
 
     bool parse_(const QJsonDocument& document)
     {
@@ -173,6 +173,17 @@ private:
         if (document_.isObject())
         {
             auto root = document_.object();
+
+            // Check if the root contains a key named "results"
+            if (!root.contains("results"))
+                return false;
+
+            // Check if the value at the "results" key is an array
+            if (!root["results"].isArray())
+                return false;
+
+            // Check for erroneous keys, etc?
+
             auto array = root["results"].toArray();
 
             for (const auto& value : array)
