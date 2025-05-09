@@ -10,6 +10,16 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+/// There may be an issue. Let's say We have many speakers, and we have Speaker
+/// 10. We want to change it to Speaker 20 or something like that. When we
+/// delete the 0, we will have double Speaker 1 items. This may be a problem.
+/// Then we will also be updating Speaker 1, once we delete the 1, we will edit
+/// both former Speaker 10 and Speaker 1
+/// 
+/// Instead, we could just make the boxes non-editable, then add buttons for
+/// opening a field to edit (rename and add). We could disallow the edit/add if
+/// the role name is the same as an existing role.
+
 class ElementBlock : public QWidget
 {
     Q_OBJECT
