@@ -41,9 +41,9 @@ public:
         // Find or add?
     }
 
-    void setText(const QString& text)
+    void setSpeech(const QString& speech)
     {
-        speechTextView_->setPlainText(text);
+        speechTextView_->setPlainText(speech);
     }
 
     void setEot(bool eot)

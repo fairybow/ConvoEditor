@@ -34,17 +34,15 @@ public:
         mainLayout_->addWidget(scrollArea_);
     }
 
-    void add(const QString& role, const QString& text, bool eot)
+    void add(const QString& role, const QString& speech, bool eot)
     {
         auto block = new ElementBlock(scrollAreaContainer_);
 
         block->setRole(role);
-        block->setText(text);
+        block->setSpeech(speech);
         block->setEot(eot);
 
         scrollAreaLayout_->addWidget(block);
-
-        qDebug() << "widget theoretically added";
     }
 
     void clear()

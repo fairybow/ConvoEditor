@@ -19,7 +19,7 @@ public:
     struct Element
     {
         QString role{};
-        QString text{};
+        QString speech{};
         bool eot = true;
     };
 
@@ -77,6 +77,9 @@ signals:
     // element adjusted/removed/added
 
 private:
+    static constexpr auto ROLE_KEY = "Role";
+    static constexpr auto SPEECH_KEY = "Content";
+    static constexpr auto EOT_KEY = "EndOfTurn";
     QJsonDocument document_{};
     QList<Element> elements_{};
 
@@ -103,12 +106,12 @@ private:
         if (document_.isObject())
         {
             auto root = document_.object();
-            auto array = root["elements"].toObject().value("results").toArray();
+            auto array = root["results"].toArray();
 
             for (const auto& value : array)
             {
                 if (!value.isObject()) continue;
-                elements_ << toElement_(value); // <- this is not being reached
+                elements_ << toElement_(value);
             }
         }
     }
@@ -118,11 +121,9 @@ private:
         Element element{};
         auto obj = value.toObject();
 
-        element.role = obj["Role"].toString();
-        element.text = obj["Text"].toString();
-        element.eot = obj["EndOfTurn"].toBool();
-
-        qDebug() << "Element added:" << element.role << element.text << element.eot;
+        element.role = obj[ROLE_KEY].toString();
+        element.speech = obj[SPEECH_KEY].toString();
+        element.eot = obj[EOT_KEY].toBool();
 
         return element;
     }
