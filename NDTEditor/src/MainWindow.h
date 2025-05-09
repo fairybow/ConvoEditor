@@ -26,9 +26,9 @@ public:
         connect
         (
             jsonModel_,
-            &JsonModel::reset,
+            &JsonModel::loaded,
             this,
-            &MainWindow::onJsonModelReset_
+            &MainWindow::onJsonModelLoaded_
         );
     }
 
@@ -82,8 +82,12 @@ private:
     JsonModel* jsonModel_ = new JsonModel(this);
 
 private slots:
-    void onJsonModelReset_()
+    void onJsonModelLoaded_()
     {
         qDebug() << "honk honk!";
+        qDebug() << jsonModel_->document();
+
+        // Clear View blocks
+        // Create new blocks for each element in the model
     }
 };

@@ -54,14 +54,21 @@ public:
             return false;
         }
 
+        // No errors, so loading will proceed
         document_ = docuemnt;
         parse_();
+        emit loaded();
         
         return true;
     }
 
+    QJsonDocument document() const
+    {
+        return document_;
+    }
+
 signals:
-    void reset();
+    void loaded();
 
 private:
     QJsonDocument document_{};
@@ -82,8 +89,6 @@ private:
                 elements_ << toElement_(value);
             }
         }
-
-        emit reset();
     }
 
     Element toElement_(const QJsonValueRef& value)

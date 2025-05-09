@@ -34,10 +34,10 @@ public:
 
         /// Testing:
 
-        scrollAreaLayout_->addWidget(new ElementBlock(this));
-        scrollAreaLayout_->addWidget(new ElementBlock(this));
-        scrollAreaLayout_->addWidget(new ElementBlock(this));
-        scrollAreaLayout_->addWidget(new ElementBlock(this));
+        //scrollAreaLayout_->addWidget(new ElementBlock(this));
+        //scrollAreaLayout_->addWidget(new ElementBlock(this));
+        //scrollAreaLayout_->addWidget(new ElementBlock(this));
+        //scrollAreaLayout_->addWidget(new ElementBlock(this));
     }
 
 private:
