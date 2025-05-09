@@ -8,8 +8,8 @@
 #include <QInputDialog>
 #include <QList>
 #include <QPlainTextEdit>
-#include <QString>
 #include <QSet>
+#include <QString>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
