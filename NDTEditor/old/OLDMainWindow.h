@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -7,8 +7,10 @@
 #include <QMimeData>
 #include <QUrl>
 
-#include "View.h"
+#include "JsonModel.h"
+#include "JsonView.h"
 
+// Functions as our Presenter
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -18,9 +20,37 @@ public:
         : QMainWindow(parent)
     {
         setAcceptDrops(true);
-        setCentralWidget(view_);
+        setCentralWidget(jsonView_);
 
-        // connections, if even needed
+        connect
+        (
+            jsonModel_,
+            &JsonModel::loaded,
+            this,
+            &MainWindow::onJsonModelLoaded_
+        );
+
+        connect
+        (
+            jsonView_,
+            &JsonView::roleChangeRequested,
+            this,
+            [&](const QString& from, const QString& to)
+            {
+                jsonModel_->replaceRole(from, to);
+            }
+        );
+
+        connect
+        (
+            jsonView_,
+            &JsonView::roleAddRequested,
+            this,
+            [&](const QString& role)
+            {
+                jsonModel_->addRole(role);
+            }
+        );
     }
 
 protected:
@@ -55,7 +85,7 @@ protected:
         QUrl url = event->mimeData()->urls().at(0);
         auto path = url.toLocalFile();
 
-        if (view_->load(path))
+        if (jsonModel_->load(path))
         {
             setWindowTitle(QFileInfo(path).fileName());
             event->acceptProposedAction();
@@ -69,5 +99,27 @@ protected:
     }
 
 private:
-    View* view_ = new View(this);
+    JsonView* jsonView_ = new JsonView(this);
+    JsonModel* jsonModel_ = new JsonModel(this);
+
+private slots:
+    void onJsonModelLoaded_()
+    {
+        // Clear View blocks
+        // Create new blocks for each element in the model
+
+        jsonView_->clear();
+        jsonView_->initRoles(jsonModel_->roles());
+
+        for (auto& element : jsonModel_->elements())
+        {
+            jsonView_->add
+            (
+                element.role,
+                element.speech,
+                element.eot
+            );
+        }
+    }
 };
+*/
