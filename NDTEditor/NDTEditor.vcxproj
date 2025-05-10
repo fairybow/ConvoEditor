@@ -23,17 +23,27 @@
     <None Include="..\.gitignore" />
     <None Include="..\README.md" />
     <None Include="cpp.hint" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="src\ElementBlock.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="src\JsonModel.h" />
-    <QtMoc Include="src\MainWindow.h" />
-    <QtMoc Include="src\JsonView.h" />
+    <None Include="docs\Diagram.puml" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDElementBlock.h" />
+    <ClInclude Include="src\Io.h" />
+    <QtMoc Include="src\Element.h" />
+    <QtMoc Include="src\MainWindow.h" />
+    <ClInclude Include="src\Snapshot.h" />
+    <QtMoc Include="src\View.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDJsonModel.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDJsonView.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDMainWindow.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{921B71DF-6235-43B1-A6E8-02B7C854A975}</ProjectGuid>

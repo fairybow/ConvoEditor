@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <QApplication>
 #include <QCheckBox>
@@ -149,3 +149,4 @@ private slots:
         emit roleAddRequested(role);
     }
 };
+*/

@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <algorithm>
 
@@ -160,3 +160,4 @@ private slots:
         emit roleAddRequested(role);
     }
 };
+*/

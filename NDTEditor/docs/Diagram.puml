@@ -1,0 +1,62 @@
+@startuml
+!theme plain
+skinparam classAttributeIconSize 0
+
+class MainWindow {
+  - view: View*
+  + onFileDrop(path: QString)
+}
+
+class View {
+  - scrollArea: QScrollArea*
+  - elementsLayout: QVBoxLayout*
+  - elements: List<Element*>
+  - roles: List<QString>
+  - undoStack: List<Snapshot>
+  - currentIndex: int
+  + load(path: QString)
+  + save(path: QString)
+  + undo()
+  + redo()
+  + add(role, speech, eot): Element*
+  + clear()
+  - saveCurrentSnapshot()
+  - applySnapshot(snapshot: Snapshot)
+}
+
+class Element {
+  - roleSelector: QComboBox*
+  - speechEdit: QPlainTextEdit*
+  - eotSelector: QCheckBox*
+  + role(): QString
+  + speech(): QString  
+  + eot(): bool
+  + setRole(role: QString)
+  + setSpeech(speech: QString)
+  + setEot(eot: bool)
+  + toJsonObject(): QJsonObject
+  {signal} snapshotRequested()
+}
+
+class Snapshot {
+  - jsonDocument: QJsonDocument
+  - roles: Set<QString>
+  {static} + fromView(view: View*): Snapshot
+  + applyToView(view: View*)
+  + toJsonDocument(): QJsonDocument
+  {static} + fromJsonDocument(doc: QJsonDocument): Snapshot
+}
+
+MainWindow *-- View : contains
+View *-- "many" Element : contains
+View o-- "many" Snapshot : manages undo stack
+Snapshot ..> View : captures/restores
+Element ..> View : signals snapshot
+
+note right of View
+  Combined editor and view
+  Manages elements, snapshots,
+  and file operations
+end note
+
+@enduml

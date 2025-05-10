@@ -9,6 +9,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{ff0d2aaa-41f9-46f1-9d56-e9a2a6b37d94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Old">
+      <UniqueIdentifier>{92199ea3-aeb7-4fde-a4be-c96495cd15b0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Image Include="resources\NDTEditor.ico">
@@ -29,24 +35,44 @@
     <None Include="cpp.hint" />
     <None Include="..\README.md" />
     <None Include="..\.gitignore" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="src\ElementBlock.h">
-      <Filter>Source Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\JsonView.h">
-      <Filter>Source Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\MainWindow.h">
-      <Filter>Source Files</Filter>
-    </QtMoc>
-    <QtMoc Include="src\JsonModel.h">
-      <Filter>Source Files</Filter>
-    </QtMoc>
+    <None Include="docs\Diagram.puml">
+      <Filter>Docs</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDElementBlock.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDJsonModel.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDJsonView.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDMainWindow.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Snapshot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Io.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\MainWindow.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Element.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
+    <QtMoc Include="src\View.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

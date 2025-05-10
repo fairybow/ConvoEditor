@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <QFile>
 #include <QJsonArray>
@@ -220,3 +220,4 @@ private:
         return element;
     }
 };
+*/
