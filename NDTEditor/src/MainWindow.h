@@ -20,7 +20,7 @@ public:
         setAcceptDrops(true);
         setCentralWidget(view_);
 
-        // connections
+        // connections, if even needed
     }
 
 protected:
@@ -70,7 +70,4 @@ protected:
 
 private:
     View* view_ = new View(this);
-
-private slots:
-    //...
 };

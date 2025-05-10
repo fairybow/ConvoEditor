@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -176,14 +178,44 @@ private:
         }
     }
 
+    void sortRoleChoices_()
+    {
+        std::sort(roleChoices_.begin(), roleChoices_.end());
+    }
+
 private slots:
     void onElementRoleChangeRequested_(const QString& from, const QString& to)
     {
+        roleChoices_.removeAll(from);
+        roleChoices_ << to;
+        sortRoleChoices_();
 
+        for (auto i = 0; i < elements_.count(); ++i)
+        {
+            if (auto element = elements_.at(i))
+            {
+                // Recall current selection
+                auto current = element->role();
+                element->setRoleChoices(roleChoices_);
+                element->setRole((current == from) ? to : current);
+            }
+        }
     }
     
     void onElementRoleAddRequested_(const QString& role)
     {
+        roleChoices_ << role;
+        sortRoleChoices_();
 
+        for (auto i = 0; i < elements_.count(); ++i)
+        {
+            if (auto element = elements_.at(i))
+            {
+                // Recall current selection
+                auto current = element->role();
+                element->setRoleChoices(roleChoices_);
+                element->setRole(current);
+            }
+        }
     }
 };
