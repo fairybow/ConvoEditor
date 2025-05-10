@@ -7,7 +7,6 @@
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QPlainTextEdit>
-#include <QSet>
 #include <QString>
 #include <QStringList>
 #include <QToolButton>

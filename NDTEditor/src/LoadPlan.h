@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QJsonObject>
 #include <QJsonValue>
 #include <QObject>
 #include <QSet>
