@@ -10,7 +10,7 @@
 
 namespace Io
 {
-    QJsonDocument read(const QString& path)
+    inline QJsonDocument read(const QString& path)
     {
         QFile file(path);
 

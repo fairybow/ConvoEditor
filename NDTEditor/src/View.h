@@ -30,7 +30,7 @@ public:
     bool load(const QString& path)
     {
         auto document = Io::read(path);
-        if (document.isNull()) return;
+        if (document.isNull()) return false;
 
         // No errors, so loading will proceed
 
@@ -47,13 +47,11 @@ public:
             populate_(plan);
             return true;
         }
-        else
-        {
-            qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
-            elements_ = old_elements;
-            roleChoices_ = old_role_choices;
-            return false;
-        }
+
+        qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
+        elements_ = old_elements;
+        roleChoices_ = old_role_choices;
+        return false;
     }
 
 private:
@@ -147,15 +145,16 @@ private:
     {
         roleChoices_ = plan.roles();
 
-        for (auto& json_value : plan.jsonValues())
+        for (auto& item : plan.items())
         {
             auto element = new Element(elementsLayoutContainer_);
+            elements_ << element;
+
             element->setRoleChoices(roleChoices_);
 
-            auto obj = json_value.toObject();
-            element->setRole(obj[Keys::ROLE].toString());
-            element->setSpeech(obj[Keys::SPEECH].toString());
-            element->setEot(obj[Keys::EOT].toBool());
+            element->setRole(item.role);
+            element->setSpeech(item.speech);
+            element->setEot(item.eot);
 
             elementsLayout_->addWidget(element);
 

@@ -51,7 +51,8 @@ public:
 
     void setRoleChoices(const QStringList& roles)
     {
-        //...
+        roleSelector_->clear();
+        roleSelector_->addItems(roles);
     }
 
 signals:
