@@ -1,5 +1,10 @@
 #pragma once
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QLayoutItem>
 #include <QList>
 #include <QScrollArea>
 #include <QString>
@@ -8,6 +13,8 @@
 
 #include "Element.h"
 #include "Io.h"
+#include "Keys.h"
+#include "LoadPlan.h"
 
 class View : public QWidget
 {
@@ -20,43 +27,61 @@ public:
         initialize_();
     }
 
-    void load(const QString& path)
+    bool load(const QString& path)
     {
         auto document = Io::read(path);
         if (document.isNull()) return;
 
         // No errors, so loading will proceed
 
-        QList<Element> old_elements = elements_;
-        QSet<QString> old_roles = roles_;
+        QList<Element*> old_elements = elements_;
+        QList<QString> old_role_choices = roleChoices_;
+        elements_.clear();
+        roleChoices_.clear();
 
-        if (parse_(document))
+        auto plan = parse_(document);
+
+        if (!plan.isNull())
         {
-            emit loaded();
+            clearElements_();
+            populate_(plan);
             return true;
         }
         else
         {
             qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
-            document_ = old_document;
             elements_ = old_elements;
-            roles_ = old_roles;
+            roleChoices_ = old_role_choices;
             return false;
         }
     }
 
-signals:
-    //...
-
 private:
+    static constexpr auto EXPECTED = R"(
+{
+    "results": [
+        {
+            "Role": "Speaker 0",
+            "Content" : "Hello. How are you?",
+            "EndOfTurn" : true
+        },
+        {
+            "Role": "Speaker 1",
+            "Content" : "Hi, um",
+            "EndOfTurn" : false
+        }
+    ]
+}
+)";
+
     QVBoxLayout* mainLayout_ = nullptr;
     QScrollArea* scrollArea_ = new QScrollArea(this);
     QWidget* elementsLayoutContainer_ = new QWidget(scrollArea_);
-    QVBoxLayout* elementsLayout_ = nullptr;
 
     // Not keeping JsonDocument. View is SSOT
+    QVBoxLayout* elementsLayout_ = nullptr;
     QList<Element*> elements_{};
-    QList<QString> roles_{};
+    QList<QString> roleChoices_{};
     // Later, undo/redo stack QList<Snapshot>
 
     void initialize_()
@@ -76,6 +101,90 @@ private:
         mainLayout_->addWidget(scrollArea_);
     }
 
+    LoadPlan parse_(const QJsonDocument& document)
+    {
+        LoadPlan plan{};
+
+        if (document.isObject())
+        {
+            auto root = document.object();
+
+            if (!root.contains(Keys::RESULTS_ARRAY))
+                return plan;
+
+            // Check if the value at the "results" key is an array
+            if (!root[Keys::RESULTS_ARRAY].isArray())
+                return plan;
+
+            // Check for erroneous keys, etc?
+
+            auto array = root["results"].toArray();
+
+            for (const auto& value : array)
+            {
+                if (!value.isObject()) continue;
+                plan.add(value);
+            }
+        }
+
+        return plan;
+    }
+
+    void clearElements_()
+    {
+        QLayoutItem* item = nullptr;
+
+        while ((item = elementsLayout_->takeAt(0)) != nullptr)
+        {
+            if (auto widget = item->widget())
+                delete widget;
+
+            delete item;
+        }
+    }
+
+    void populate_(const LoadPlan& plan)
+    {
+        roleChoices_ = plan.roles();
+
+        for (auto& json_value : plan.jsonValues())
+        {
+            auto element = new Element(elementsLayoutContainer_);
+            element->setRoleChoices(roleChoices_);
+
+            auto obj = json_value.toObject();
+            element->setRole(obj[Keys::ROLE].toString());
+            element->setSpeech(obj[Keys::SPEECH].toString());
+            element->setEot(obj[Keys::EOT].toBool());
+
+            elementsLayout_->addWidget(element);
+
+            connect
+            (
+                element,
+                &Element::roleChangeRequested,
+                this,
+                &View::onElementRoleChangeRequested_
+            );
+
+            connect
+            (
+                element,
+                &Element::roleAddRequested,
+                this,
+                &View::onElementRoleAddRequested_
+            );
+        }
+    }
+
 private slots:
-    //...
+    void onElementRoleChangeRequested_(const QString& from, const QString& to)
+    {
+
+    }
+    
+    void onElementRoleAddRequested_(const QString& role)
+    {
+
+    }
 };

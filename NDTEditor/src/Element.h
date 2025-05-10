@@ -1,14 +1,12 @@
 #pragma once
 
-#include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QList>
+#include <QStringList>
 #include <QPlainTextEdit>
-#include <QSet>
 #include <QString>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -51,13 +49,14 @@ public:
     bool eot() const { return eotSelector_->isChecked(); }
     void setEot(bool eot) { eotSelector_->setChecked(eot); }
 
-    void setRoleChoices()
+    void setRoleChoices(const QStringList& roles)
     {
         //...
     }
 
 signals:
-    //...
+    void roleChangeRequested(const QString& from, const QString& to);
+    void roleAddRequested(const QString& role);
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;

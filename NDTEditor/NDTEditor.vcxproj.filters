@@ -60,6 +60,12 @@
     <ClInclude Include="src\Io.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\LoadPlan.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Keys.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\MainWindow.h">
