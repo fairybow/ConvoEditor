@@ -88,12 +88,11 @@ private:
 
     bool roleExists_(const QString& role) const
     {
-        QSet<QString> texts{};
-
         for (auto i = 0; i < roleSelector_->count(); ++i)
-            texts << roleSelector_->itemText(i);
+            if (role == roleSelector_->itemText(i))
+                return true;
 
-        return texts.contains(role);
+        return false;
     }
 
     QString getInput_(const QString& label, const QString& currentText = {})

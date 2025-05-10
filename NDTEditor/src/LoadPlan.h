@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
 #include <QJsonValue>
 #include <QObject>
 #include <QSet>
@@ -9,6 +7,7 @@
 #include <QStringList>
 
 #include "Keys.h"
+#include "Utility.h"
 
 class LoadPlan
 {
@@ -48,9 +47,7 @@ public:
 
     QStringList roles() const
     {
-        QStringList r{ roles_.begin(), roles_.end() };
-        std::sort(r.begin(), r.end());
-        return r;
+        return toList(roles_, Utility::Sort::Yes);
     }
 
 private:
