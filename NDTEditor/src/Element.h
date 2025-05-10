@@ -1,13 +1,15 @@
 #pragma once
 
+#include <QApplication>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QStringList>
 #include <QPlainTextEdit>
+#include <QSet>
 #include <QString>
+#include <QStringList>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -37,7 +39,21 @@ public:
         mainLayout_->addLayout(topLayout_, 0);
         mainLayout_->addWidget(speechEdit_, 0);
 
-        // connections
+        connect
+        (
+            editRole_,
+            &QToolButton::clicked,
+            this,
+            &Element::onEditRoleClicked_
+        );
+
+        connect
+        (
+            addRole_,
+            &QToolButton::clicked,
+            this,
+            &Element::onAddRoleClicked_
+        );
     }
 
     virtual ~Element() override { qDebug() << __FUNCTION__; }
@@ -70,6 +86,42 @@ private:
     QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
     QCheckBox* eotSelector_ = new QCheckBox(this);
 
+    bool roleExists_(const QString& role) const
+    {
+        QSet<QString> texts{};
+
+        for (auto i = 0; i < roleSelector_->count(); ++i)
+            texts << roleSelector_->itemText(i);
+
+        return texts.contains(role);
+    }
+
+    QString getInput_(const QString& label, const QString& currentText = {})
+    {
+        return QInputDialog::getText
+        (
+            this,
+            qApp->applicationName(),
+            label,
+            QLineEdit::Normal,
+            currentText
+        ).trimmed();
+    }
+
 private slots:
-    //...
+    void onEditRoleClicked_()
+    {
+        auto now = getInput_("Edit Role", roleSelector_->currentText());
+        if (now.isEmpty() || roleExists_(now)) return;
+
+        emit roleChangeRequested(roleSelector_->currentText(), now);
+    }
+
+    void onAddRoleClicked_()
+    {
+        auto role = getInput_("Add Role"); // Current text could be speaker +1
+        if (role.isEmpty() || roleExists_(role)) return;
+
+        emit roleAddRequested(role);
+    }
 };
