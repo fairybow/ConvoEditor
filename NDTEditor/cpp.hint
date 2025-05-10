@@ -9,3 +9,4 @@
 #define qWarning QMessageLogger(QT_MESSAGELOG_FILE, QT_MESSAGELOG_LINE, QT_MESSAGELOG_FUNC).warning
 #define qWarning
 #define emit
+#define signals public

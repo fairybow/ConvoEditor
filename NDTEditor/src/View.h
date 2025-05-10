@@ -26,7 +26,7 @@ public:
         if (document.isNull()) return;
 
         // No errors, so loading will proceed
-        QJsonDocument old_document = document_;
+
         QList<Element> old_elements = elements_;
         QSet<QString> old_roles = roles_;
 
@@ -57,7 +57,7 @@ private:
     // Not keeping JsonDocument. View is SSOT
     QList<Element*> elements_{};
     QList<QString> roles_{};
-    // Undo/redo stack QList<Snapshot>
+    // Later, undo/redo stack QList<Snapshot>
 
     void initialize_()
     {

@@ -57,9 +57,6 @@
     <ClInclude Include="old\OLDMainWindow.h">
       <Filter>Old</Filter>
     </ClInclude>
-    <ClInclude Include="src\Snapshot.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Io.h">
       <Filter>Source Files</Filter>
     </ClInclude>
