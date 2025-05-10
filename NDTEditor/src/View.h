@@ -54,6 +54,7 @@ private:
     QWidget* elementsLayoutContainer_ = new QWidget(scrollArea_);
     QVBoxLayout* elementsLayout_ = nullptr;
 
+    // Not keeping JsonDocument. View is SSOT
     QList<Element*> elements_{};
     QList<QString> roles_{};
     // Undo/redo stack QList<Snapshot>
