@@ -1,9 +1,9 @@
 #pragma once
 
+#include <QCheckBox>
+#include <QComboBox>
 #include <QObject>
 #include <QPointer>
-
-#include "EotCheck.h"
 
 /// @warning These function more as a record (or a command-on-redo-only). We are
 /// not intercepting user input, merely observing and recording for reuse
@@ -25,24 +25,24 @@ signals:
     void invalidated(Command*);
 };
 
-class EotCheckCommand : public Command
+class CheckBoxCommand : public Command
 {
     Q_OBJECT
 
 public:
-    EotCheckCommand
+    CheckBoxCommand
     (
-        EotCheck* eotCheck,
+        QCheckBox* checkBox,
         bool old, bool now,
         QObject* parent = nullptr
     )
         : Command(parent)
-        , eotCheck_(eotCheck)
+        , checkBox_(checkBox)
         , old_(old), new_(now)
     {
         connect
         (
-            eotCheck_,
+            checkBox_,
             &QObject::destroyed,
             this,
             [&] { emit invalidated(this); }
@@ -51,24 +51,75 @@ public:
 
     virtual void execute() override
     {
-        if (!eotCheck_) return;
+        if (!checkBox_) return;
 
-        auto block = eotCheck_->blockSignals(true);
-        eotCheck_->setChecked(new_);
-        eotCheck_->blockSignals(block);
+        auto block = checkBox_->blockSignals(true);
+        checkBox_->setChecked(new_);
+        checkBox_->blockSignals(block);
     }
 
     virtual void undo() override
     {
-        if (!eotCheck_) return;
+        if (!checkBox_) return;
 
-        auto block = eotCheck_->blockSignals(true);
-        eotCheck_->setChecked(old_);
-        eotCheck_->blockSignals(block);
+        auto block = checkBox_->blockSignals(true);
+        checkBox_->setChecked(old_);
+        checkBox_->blockSignals(block);
     }
 
 private:
-    QPointer<EotCheck> eotCheck_;
+    QPointer<QCheckBox> checkBox_;
     bool old_;
     bool new_;
 };
+
+// Would maybe need to use text and not index, since if an item is removed,
+// index is no longer valid. If text is no longer valid, it won't be reassigned
+// like index, so we can check it.
+/*class ComboBoxSwitchCommand : public Command
+{
+    Q_OBJECT
+
+public:
+    ComboBoxSwitchCommand
+    (
+        QComboBox* comboBox,
+        int old, int now,
+        QObject* parent = nullptr
+    )
+        : Command(parent)
+        , comboBox_(comboBox)
+        , old_(old), new_(now)
+    {
+        connect
+        (
+            comboBox_,
+            &QObject::destroyed,
+            this,
+            [&] { emit invalidated(this); }
+        );
+    }
+
+    virtual void execute() override
+    {
+        if (!comboBox_) return;
+
+        auto block = comboBox_->blockSignals(true);
+        comboBox_->setCurrentIndex(new_);
+        comboBox_->blockSignals(block);
+    }
+
+    virtual void undo() override
+    {
+        if (!comboBox_) return;
+
+        auto block = comboBox_->blockSignals(true);
+        comboBox_->setCurrentIndex(old_);
+        comboBox_->blockSignals(block);
+    }
+
+private:
+    QPointer<QComboBox> comboBox_;
+    int old_;
+    int new_;
+};*/

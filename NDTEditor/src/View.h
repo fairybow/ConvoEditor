@@ -374,7 +374,7 @@ private:
 
     void onElementEotCheckToggled_(EotCheck* eotCheck, bool now)
     {
-        auto command = std::make_unique<EotCheckCommand>(eotCheck, !now, now);
+        auto command = std::make_unique<CheckBoxCommand>(eotCheck, !now, now);
         commandStack_->push(std::move(command));
     }
 
