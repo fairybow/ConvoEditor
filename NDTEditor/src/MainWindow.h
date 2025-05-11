@@ -25,11 +25,15 @@ public:
         save_->setText("Save");
         autoEot_->setText("Auto EOT");
         split_->setText("Split");
+        undo_->setText("Undo");
+        redo_->setText("Redo");
 
         auto status_bar = new QStatusBar(this);
         status_bar->addWidget(save_);
         status_bar->addWidget(autoEot_);
         status_bar->addWidget(split_);
+        status_bar->addWidget(undo_);
+        status_bar->addWidget(redo_);
         setStatusBar(status_bar);
 
         connect
@@ -107,4 +111,6 @@ private:
     QToolButton* save_ = new QToolButton(this);
     QToolButton* autoEot_ = new QToolButton(this);
     QToolButton* split_ = new QToolButton(this);
+    QToolButton* undo_ = new QToolButton(this);
+    QToolButton* redo_ = new QToolButton(this);
 };

@@ -47,6 +47,7 @@ public:
 signals:
     void roleChangeRequested(const QString& from, const QString& to);
     void roleAddRequested(const QString& role);
+    void deleteRequested(Element*);
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event) override
@@ -71,6 +72,7 @@ private:
     QHBoxLayout* topLayout_ = nullptr;
     QToolButton* editRole_ = new QToolButton(this);
     QToolButton* addRole_ = new QToolButton(this);
+    QToolButton* delete_ = new QToolButton(this);
 
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
@@ -87,14 +89,16 @@ private:
 
         editRole_->setText("Edit");
         addRole_->setText("Add");
+        delete_->setText("x");
 
-        editRole_->setObjectName("Edit");
-        addRole_->setObjectName("Add");
+        //editRole_->setObjectName("Edit");
+        //addRole_->setObjectName("Add");
 
         editRole_->setFixedHeight(25);
         addRole_->setFixedHeight(25);
         roleSelector_->setFixedHeight(25);
         eotCheck_->setFixedHeight(25);
+        delete_->setFixedHeight(25);
 
         roleSelector_->installEventFilter(this);
         speechEdit_->installEventFilter(this);
@@ -107,6 +111,7 @@ private:
         topLayout_->addWidget(addRole_, 0);
         topLayout_->addWidget(roleSelector_, 0);
         topLayout_->addWidget(eotCheck_, 0);
+        topLayout_->addWidget(delete_, 0);
 
         mainLayout_->addLayout(topLayout_, 0);
         mainLayout_->addWidget(speechEdit_, 1);
@@ -125,6 +130,14 @@ private:
             &QToolButton::clicked,
             this,
             &Element::onAddRoleClicked_
+        );
+
+        connect
+        (
+            delete_,
+            &QToolButton::clicked,
+            this,
+            [&] { emit deleteRequested(this); }
         );
     }
 

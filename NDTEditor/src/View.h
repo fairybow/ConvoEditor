@@ -254,6 +254,14 @@ private:
             this,
             [&] { split(); }
         );
+
+        connect
+        (
+            element,
+            &Element::deleteRequested,
+            this,
+            &View::onElementDeleteRequested_
+        );
     }
 
     InsertButton* insertInsertButton_(int position)
@@ -393,5 +401,42 @@ private slots:
 
         if (auto edit = to_edit(now))
             currentEdit_ = edit;
+    }
+
+    void onElementDeleteRequested_(Element* element)
+    {
+        auto index = elements_.indexOf(element);
+        if (index < 0) return;
+
+        elements_.removeAt(index);
+
+        auto element_layout_index = (index * 2) + 1;
+        auto insert_button_layout_index = (index + 1) * 2;
+
+        // Remove the element widget from layout
+        auto element_item = elementsLayout_->takeAt(element_layout_index);
+        if (element_item)
+        {
+            if (auto widget = element_item->widget())
+                delete widget;  // This deletes the Element widget
+
+            delete element_item;
+        }
+
+        // Remove the trailing insert button from list
+        insertButtons_.removeAt(index + 1);
+
+        // Remove the trailing insert button widget from layout
+        auto button_item = elementsLayout_->takeAt(insert_button_layout_index - 1); // -1 because we already removed one item
+        if (button_item)
+        {
+            if (auto widget = button_item->widget())
+                delete widget;  // This deletes the button container widget
+
+            delete button_item;
+        }
+
+        // Update positions of all subsequent insert buttons
+        updateInsertButtonPositions_(index + 1);
     }
 };
