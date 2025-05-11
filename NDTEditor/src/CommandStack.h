@@ -30,6 +30,14 @@ public:
         // Execute the command
         //command->execute();
 
+        connect
+        (
+            command.get(),
+            &Command::invalidated,
+            this,
+            &CommandStack::onCommandInvalidated_
+        );
+
         // Add to undo stack
         undos_.push(command.release());
 
@@ -77,10 +85,6 @@ public:
         emit canRedoChanged(false);
     }
 
-    // Add a slot for onCommandSubjectDestroyed and in each Command subclass,
-    // emit a signal when its subject (e.g. EOT Check Box) is destroyed, so it
-    // can be removed from the list and the canUndo/Redo signals emitted again
-
 signals:
     void canUndoChanged(bool canUndo);
     void canRedoChanged(bool canRedo);
@@ -88,4 +92,27 @@ signals:
 private:
     QStack<Command*> undos_{};
     QStack<Command*> redos_{};
+
+private slots:
+    void onCommandInvalidated_(Command* command)
+    {
+        auto undo_index = undos_.indexOf(command);
+
+        if (undo_index > -1)
+        {
+            undos_.remove(undo_index);
+            delete command;
+            emit canUndoChanged(!undos_.isEmpty());
+            return;
+        }
+
+        auto redo_index = redos_.indexOf(command);
+
+        if (redo_index > -1)
+        {
+            redos_.remove(redo_index);
+            delete command;
+            emit canRedoChanged(!redos_.isEmpty());
+        }
+    }
 };

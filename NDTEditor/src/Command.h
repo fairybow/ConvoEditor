@@ -22,7 +22,7 @@ public:
     virtual void undo() = 0;
 
 signals:
-    void subjectDestroyed(Command*);
+    void invalidated(Command*);
 };
 
 class EotCheckCommand : public Command
@@ -40,6 +40,13 @@ public:
         , eotCheck_(eotCheck)
         , old_(old), new_(now)
     {
+        connect
+        (
+            eotCheck_,
+            &QObject::destroyed,
+            this,
+            [&] { emit invalidated(this); }
+        );
     }
 
     virtual void execute() override
