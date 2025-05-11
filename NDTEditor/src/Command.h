@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QPointer>
 
-#include "Element.h"
+#include "EotCheck.h"
 
 /// @warning These function more as a record (or a command-on-redo-only). We are
 /// not intercepting user input, merely observing and recording for reuse
@@ -29,40 +29,36 @@ class EotCheckCommand : public Command
 public:
     EotCheckCommand
     (
-        Element* element,
+        EotCheck* eotCheck,
         bool old, bool now,
         QObject* parent = nullptr
     )
         : Command(parent)
-        , element_(element)
+        , eotCheck_(eotCheck)
         , old_(old), new_(now)
     {
     }
 
     virtual void execute() override
     {
-        if (!element_) return;
+        if (!eotCheck_) return;
 
-        // It's dumb that I handle the EOT check box both directly and via its
-        // parent element
-        auto eot_check = element_->eotCheck();
-        auto block = eot_check->blockSignals(true);
-        element_->setEot(new_);
-        eot_check->blockSignals(block);
+        auto block = eotCheck_->blockSignals(true);
+        eotCheck_->setChecked(new_);
+        eotCheck_->blockSignals(block);
     }
 
     virtual void undo() override
     {
-        if (!element_) return;
+        if (!eotCheck_) return;
 
-        auto eot_check = element_->eotCheck();
-        auto block = eot_check->blockSignals(true);
-        element_->setEot(old_);
-        eot_check->blockSignals(block);
+        auto block = eotCheck_->blockSignals(true);
+        eotCheck_->setChecked(old_);
+        eotCheck_->blockSignals(block);
     }
 
 private:
-    QPointer<Element> element_;
+    QPointer<EotCheck> eotCheck_;
     bool old_;
     bool new_;
 };

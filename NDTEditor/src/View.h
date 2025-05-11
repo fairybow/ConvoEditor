@@ -273,12 +273,14 @@ private:
             &View::onElementDeleteRequested_
         );
 
+        auto eot_check = element->eotCheck();
+
         connect
         (
-            element->eotCheck(),
+            eot_check,
             &EotCheck::toggled,
             this,
-            [=](bool checked) { onElementEotCheckToggled_(element, checked); }
+            [=](bool checked) { onElementEotCheckToggled_(eot_check, checked); }
         );
     }
 
@@ -370,9 +372,9 @@ private:
         updateInsertButtonPositions_(position + 1);
     }
 
-    void onElementEotCheckToggled_(Element* element, bool now)
+    void onElementEotCheckToggled_(EotCheck* eotCheck, bool now)
     {
-        auto command = std::make_unique<EotCheckCommand>(element, !now, now);
+        auto command = std::make_unique<EotCheckCommand>(eotCheck, !now, now);
         commandStack_->push(std::move(command));
     }
 

@@ -7,6 +7,8 @@
 
 #include "Command.h"
 
+/// @warning These function more as a record (or a command-on-redo-only). We are
+/// not intercepting user input, merely observing and recording for reuse
 class CommandStack : public QObject
 {
     Q_OBJECT
@@ -26,7 +28,7 @@ public:
         redos_.clear();
 
         // Execute the command
-        //command->execute(); // We should maybe just observe and record
+        //command->execute();
 
         // Add to undo stack
         undos_.push(command.release());
@@ -74,6 +76,10 @@ public:
         emit canUndoChanged(false);
         emit canRedoChanged(false);
     }
+
+    // Add a slot for onCommandSubjectDestroyed and in each Command subclass,
+    // emit a signal when its subject (e.g. EOT Check Box) is destroyed, so it
+    // can be removed from the list and the canUndo/Redo signals emitted again
 
 signals:
     void canUndoChanged(bool canUndo);
