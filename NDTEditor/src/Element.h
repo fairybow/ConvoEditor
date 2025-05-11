@@ -17,6 +17,10 @@
 #include "EotCheck.h"
 #include "Utility.h"
 
+// For role removal, we would want a pop-up that asks what to set all roles
+// assigned to the removed role to. If we want to assign them to a new role, we
+// can just redirect to edit role name
+
 class Element : public QWidget
 {
     Q_OBJECT
