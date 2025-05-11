@@ -41,14 +41,24 @@ public:
 
     virtual void execute() override
     {
-        if (element_)
-            element_->setEot(new_);
+        if (!element_) return;
+
+        // It's dumb that I handle the EOT check box both directly and via its
+        // parent element
+        auto eot_check = element_->eotCheck();
+        auto block = eot_check->blockSignals(true);
+        element_->setEot(new_);
+        eot_check->blockSignals(block);
     }
 
     virtual void undo() override
     {
-        if (element_)
-            element_->setEot(old_);
+        if (!element_) return;
+
+        auto eot_check = element_->eotCheck();
+        auto block = eot_check->blockSignals(true);
+        element_->setEot(old_);
+        eot_check->blockSignals(block);
     }
 
 private:
