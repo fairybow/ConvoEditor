@@ -4,6 +4,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
+#include <QEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QPlainTextEdit>
@@ -26,6 +27,9 @@ public:
         addRole_->setText("Add");
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
+
+        roleSelector_->installEventFilter(this);
+        speechEdit_->installEventFilter(this);
 
         // Set up layouts
         mainLayout_ = new QVBoxLayout(this);
@@ -73,6 +77,24 @@ public:
 signals:
     void roleChangeRequested(const QString& from, const QString& to);
     void roleAddRequested(const QString& role);
+
+protected:
+    virtual bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        if (event->type() == QEvent::Wheel)
+        {
+            // If the event is for our text edit or combo box, 
+            // ignore it so it propagates to the parent scroll area
+            if (watched == speechEdit_ || watched == roleSelector_)
+            {
+                event->ignore();
+                return true; // We handled it by ignoring it
+            }
+        }
+
+        // Let the base class handle other events
+        return QWidget::eventFilter(watched, event);
+    }
 
 private:
     QVBoxLayout* mainLayout_ = nullptr;
