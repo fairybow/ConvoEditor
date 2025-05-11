@@ -12,6 +12,7 @@
 #include <QWidget>
 
 #include "Element.h"
+#include "InsertButton.h"
 #include "Io.h"
 #include "Keys.h"
 #include "LoadPlan.h"
@@ -36,21 +37,24 @@ public:
         // No errors, so loading will proceed
 
         QList<Element*> old_elements = elements_;
+        QList<InsertButton*> old_insert_buttons = insertButtons_;
         QList<QString> old_role_choices = roleChoices_;
-        elements_.clear();
+        elements_.clear(); // move to clear all widgets?
+        insertButtons_.clear(); // move to clear all widgets?
         roleChoices_.clear();
 
         auto plan = parse_(document);
 
         if (!plan.isNull())
         {
-            clearElements_();
+            clearAllWidgets_();
             populate_(plan);
             return true;
         }
 
         qWarning() << "JSON format is incorrect. Expected:" << EXPECTED;
         elements_ = old_elements;
+        insertButtons_ = old_insert_buttons;
         roleChoices_ = old_role_choices;
         return false;
     }
@@ -80,11 +84,17 @@ private:
     // Not keeping JsonDocument. View is SSOT
     QVBoxLayout* elementsLayout_ = nullptr;
     QList<Element*> elements_{};
+    QList<InsertButton*> insertButtons_{};
     QList<QString> roleChoices_{};
     // Later, undo/redo stack QList<Snapshot>
 
     void initialize_()
     {
+        //setAttribute(Qt::WA_StyledBackground, true);
+        //scrollArea_->setStyleSheet("background: transparent;");
+        //scrollArea_->viewport()->setStyleSheet("background: transparent;");
+        //elementsLayoutContainer_->setStyleSheet("background: transparent;");
+
         // Scroll area setup
         scrollArea_->setWidgetResizable(true);
         scrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -92,11 +102,9 @@ private:
         scrollArea_->setWidget(elementsLayoutContainer_);
 
         // Set up layouts
-        mainLayout_ = new QVBoxLayout(this);
-        //mainLayout_->setContentsMargins(0, 0, 0, 0);
-        elementsLayout_ = new QVBoxLayout(elementsLayoutContainer_);
-        elementsLayout_->setAlignment(Qt::AlignTop);
-        elementsLayout_->setSpacing(5);
+        mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this, Qt::AlignCenter);
+        elementsLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(elementsLayoutContainer_, Qt::AlignCenter);
+
         mainLayout_->addWidget(scrollArea_);
     }
 
@@ -115,9 +123,9 @@ private:
             if (!root[Keys::RESULTS_ARRAY].isArray())
                 return plan;
 
-            // Check for erroneous keys, etc?
+            // Check for erroneous keys, etc? Would need to set to null?
 
-            auto array = root["results"].toArray();
+            auto array = root[Keys::RESULTS_ARRAY].toArray();
 
             for (const auto& value : array)
             {
@@ -129,7 +137,8 @@ private:
         return plan;
     }
 
-    void clearElements_()
+    // Clears element and insert button container widgets
+    void clearAllWidgets_()
     {
         QLayoutItem* item = nullptr;
 
@@ -142,12 +151,76 @@ private:
         }
     }
 
+    void connectElement_(Element* element) const
+    {
+        connect
+        (
+            element,
+            &Element::roleChangeRequested,
+            this,
+            &View::onElementRoleChangeRequested_
+        );
+
+        connect
+        (
+            element,
+            &Element::roleAddRequested,
+            this,
+            &View::onElementRoleAddRequested_
+        );
+    }
+
+    InsertButton* insertInsertButton_(int position)
+    {
+        auto button_container = new QWidget(elementsLayoutContainer_);
+
+        auto container_layout = Utility::newLayout<QHBoxLayout>
+            (
+                { 1, 6, 1, 6 }, 0,
+                button_container,
+                Qt::AlignCenter
+            );
+
+        auto button = new InsertButton(position, button_container);
+        insertButtons_.insert(position, button);
+
+        container_layout->addWidget(button);
+
+        // Button at position n goes at layout index n * 2
+        elementsLayout_->insertWidget((position * 2), button_container);
+
+        button->setText("+");
+        button->setFixedSize(25, 25);
+
+        connect
+        (
+            button,
+            &InsertButton::insertRequested,
+            this,
+            [&](int pos) { insertElement_(pos); }
+        );
+
+        return button;
+    }
+
+    void updateInsertButtonPositions_(int startPosition)
+    {
+        // Update positions for all buttons from startPosition onward
+        for (auto i = startPosition; i < insertButtons_.size(); ++i)
+            insertButtons_[i]->setPosition(i);
+    }
+
     void populate_(const LoadPlan& plan)
     {
         roleChoices_ = plan.roles();
 
-        for (auto& item : plan.items())
+        // Add the first insert button before any elements
+        insertInsertButton_(0);
+
+        for (int i = 0; i < plan.items().count(); ++i)
         {
+            const auto& item = plan.items().at(i);
+
             auto element = new Element(elementsLayoutContainer_);
             elements_ << element;
 
@@ -157,24 +230,28 @@ private:
             element->setSpeech(item.speech);
             element->setEot(item.eot);
 
+            // Element goes at layout position (i * 2) + 1
             elementsLayout_->addWidget(element);
+            connectElement_(element);
 
-            connect
-            (
-                element,
-                &Element::roleChangeRequested,
-                this,
-                &View::onElementRoleChangeRequested_
-            );
-
-            connect
-            (
-                element,
-                &Element::roleAddRequested,
-                this,
-                &View::onElementRoleAddRequested_
-            );
+            // Add insert button after this element
+            insertInsertButton_(i + 1);
         }
+    }
+
+    void insertElement_(int position)
+    {
+        auto element = new Element(elementsLayoutContainer_);
+        elements_.insert(position, element);
+        element->setRoleChoices(roleChoices_);
+
+        auto element_layout_lndex = (position * 2) + 1;
+
+        elementsLayout_->insertWidget(element_layout_lndex, element);
+        connectElement_(element);
+
+        insertInsertButton_(position + 1);
+        updateInsertButtonPositions_(position + 1);
     }
 
 private slots:
@@ -195,7 +272,7 @@ private slots:
             }
         }
     }
-    
+
     void onElementRoleAddRequested_(const QString& role)
     {
         roleChoices_ << role;

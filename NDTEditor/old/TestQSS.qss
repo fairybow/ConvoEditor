@@ -1,0 +1,59 @@
+Element {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: red;
+    border-radius: 10px;
+    max-width: 420px;
+}
+
+QToolButton#Edit {
+    background-color: goldenrod;
+    border-top-left-radius: 8px;
+}
+
+QToolButton#Add {
+    background-color: cadetblue;
+    border-radius: 0px;
+}
+
+QComboBox {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: orange;
+    border-radius: 0px;
+    padding-left: 5px;
+}
+
+EotCheck {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: pink;
+    border-top-right-radius: 8px;
+}
+
+QPlainTextEdit {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: skyblue;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+InsertButton {
+    background-color: violet;
+    border: 1px solid violet;
+    border-radius: 10px;
+    min-width: 20px;
+    max-width: 20px;
+    min-height: 20px;
+    max-height: 20px;
+    margin: 5px;
+}

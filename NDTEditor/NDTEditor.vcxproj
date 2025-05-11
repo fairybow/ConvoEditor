@@ -24,12 +24,16 @@
     <None Include="..\README.md" />
     <None Include="cpp.hint" />
     <None Include="docs\Diagram.puml" />
+    <None Include="old\TestQSS.qss" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDElementBlock.h" />
+    <QtMoc Include="src\InsertButton.h" />
+    <QtMoc Include="src\EotCheck.h" />
+    <QtMoc Include="src\AutoSizeTextEdit.h" />
     <ClInclude Include="src\Io.h" />
     <ClInclude Include="src\Keys.h" />
     <ClInclude Include="src\LoadPlan.h" />

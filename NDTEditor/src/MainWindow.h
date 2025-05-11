@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QMainWindow>
 #include <QMimeData>
+#include <QStatusBar>
 #include <QUrl>
 
 #include "View.h"
@@ -19,6 +20,7 @@ public:
     {
         setAcceptDrops(true);
         setCentralWidget(view_);
+        setStatusBar(new QStatusBar(this));
 
         // connections, if even needed
     }
