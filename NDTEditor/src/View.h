@@ -10,6 +10,7 @@
 #include <QPointer>
 #include <QScrollArea>
 #include <QString>
+#include <QTextCursor>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -60,6 +61,68 @@ public:
         insertButtons_ = old_insert_buttons;
         roleChoices_ = old_role_choices;
         return false;
+    }
+
+    void split()
+    {
+        if (!currentEdit_) return;
+
+        // Find the parent Element by traversing up the widget hierarchy
+        Element* current_element = nullptr;
+        auto widget = currentEdit_->parentWidget();
+
+        while (widget)
+        {
+            if (auto next = qobject_cast<Element*>(widget))
+            {
+                current_element = next;
+                break;
+            }
+
+            widget = widget->parentWidget();
+        }
+
+        if (!current_element)
+            return;
+
+        // Find the index of this element
+        auto index = elements_.indexOf(current_element);
+        if (index < 0) return;
+
+        // Get the cursor position and text
+        auto cursor = currentEdit_->textCursor();
+        auto position = cursor.position();
+        auto text = currentEdit_->toPlainText();
+
+        // Validate we have text on both sides of cursor
+        if (position <= 0 || position >= text.length()) return;
+
+        // Split the text
+        auto before = text.left(position);
+        auto after = text.mid(position);
+
+        // Trim whitespace to check if we have actual content
+        auto before_trimmed = before.trimmed();
+        auto after_trimmed = after.trimmed();
+        if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+
+        // Set up the new element
+        LoadPlan::Item item
+        {
+            current_element->role(),
+            after_trimmed,
+            current_element->eot()
+        };
+
+        insertElement_((index + 1), item);
+
+        // Update the current element's speech
+        current_element->setSpeech(before_trimmed);
+
+        // Set cursor to the end of the original element's text
+        cursor.movePosition(QTextCursor::End);
+        currentEdit_->setTextCursor(cursor);
+        currentEdit_->setFocus();
     }
 
 private:
@@ -166,7 +229,7 @@ private:
         }
     }
 
-    void connectElement_(Element* element) const
+    void connectElement_(Element* element)
     {
         connect
         (
@@ -182,6 +245,14 @@ private:
             &Element::roleAddRequested,
             this,
             &View::onElementRoleAddRequested_
+        );
+
+        connect
+        (
+            element->speechEdit(),
+            &AutoSizeTextEdit::rightRockered,
+            this,
+            [&] { split(); }
         );
     }
 
@@ -254,11 +325,15 @@ private:
         }
     }
 
-    void insertElement_(int position)
+    void insertElement_(int position, const LoadPlan::Item item = {})
     {
         auto element = new Element(elementsLayoutContainer_);
         elements_.insert(position, element);
         element->setRoleChoices(roleChoices_);
+
+        element->setRole(item.role);
+        element->setSpeech(item.speech);
+        element->setEot(item.eot);
 
         auto element_layout_lndex = (position * 2) + 1;
 

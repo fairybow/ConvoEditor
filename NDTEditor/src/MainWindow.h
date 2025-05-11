@@ -53,7 +53,7 @@ public:
             split_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [&] { view_->split(); }
         );
     }
 

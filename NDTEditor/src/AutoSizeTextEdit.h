@@ -2,6 +2,7 @@
 
 #include <QFocusEvent>
 #include <QMargins>
+#include <QMouseEvent>
 #include <QResizeEvent>
 #include <QSize>
 #include <QTextCursor>
@@ -94,6 +95,10 @@ public:
         }
     }
 
+signals:
+    void leftRockered();
+    void rightRockered();
+
 protected:
     virtual void resizeEvent(QResizeEvent* event) override
     {
@@ -106,6 +111,50 @@ protected:
         QTextEdit::focusOutEvent(event);
         trim();
     }
+
+    virtual void mousePressEvent(QMouseEvent* event) override
+    {
+        if (event->button() == Qt::LeftButton)
+        {
+            if (rmbPressed_)
+            {
+                // Right button is already held, left click detected
+                emit leftRockered();
+                event->accept();
+                return;
+            }
+
+            lmbPressed_ = true;
+        }
+        else if (event->button() == Qt::RightButton)
+        {
+            if (lmbPressed_)
+            {
+                // Left button is already held, right click detected
+                emit rightRockered();
+                event->accept();
+                return;
+            }
+
+            rmbPressed_ = true;
+        }
+
+        QTextEdit::mousePressEvent(event);
+    }
+
+    virtual void mouseReleaseEvent(QMouseEvent* event) override
+    {
+        if (event->button() == Qt::LeftButton)
+            lmbPressed_ = false;
+        else if (event->button() == Qt::RightButton)
+            rmbPressed_ = false;
+
+        QTextEdit::mouseReleaseEvent(event);
+    }
+
+private:
+    bool lmbPressed_ = false;
+    bool rmbPressed_ = false;
 
 private slots:
     void updateHeight_()

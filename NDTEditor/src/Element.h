@@ -36,6 +36,7 @@ public:
     void setSpeech(const QString& speech) { speechEdit_->setPlainText(speech); }
     bool eot() const { return eotCheck_->isChecked(); }
     void setEot(bool eot) { eotCheck_->setChecked(eot); }
+    AutoSizeTextEdit* speechEdit() const noexcept { return speechEdit_; }
 
     void setRoleChoices(const QStringList& roles)
     {
