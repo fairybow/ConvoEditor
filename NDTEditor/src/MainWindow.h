@@ -29,6 +29,9 @@ public:
         //undo_->setText("Undo");
         //redo_->setText("Redo");
 
+        save_->setEnabled(false);
+        autoEot_->setEnabled(false);
+        split_->setEnabled(false);
         //undo_->setEnabled(false);
         //redo_->setEnabled(false);
 
@@ -45,7 +48,7 @@ public:
             save_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [&] { view_->save(); }
         );
 
         connect
@@ -62,6 +65,21 @@ public:
             &QToolButton::clicked,
             this,
             [&] { view_->split(); }
+        );
+
+        connect
+        (
+            view_,
+            &View::documentLoaded,
+            this,
+            [&]
+            {
+                // Later, use a "modificationChanged" signal for save button
+                // enabled
+                save_->setEnabled(true);
+                autoEot_->setEnabled(true);
+                split_->setEnabled(true);
+            }
         );
 
         /*auto view_command_stack = view_->commandStack();

@@ -36,7 +36,7 @@ namespace Io
         return document;
     }
 
-    bool write(const QJsonDocument& jsonDocument, const QString& path)
+    inline bool write(const QJsonDocument& jsonDocument, const QString& path)
     {
         QFile file(path);
 
