@@ -7,6 +7,7 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
+#include <QPlainTextEdit>
 #include <QString>
 #include <QStringList>
 #include <QToolButton>
@@ -14,7 +15,6 @@
 #include <QWidget>
 
 #include "EotCheck.h"
-#include "ResizingPlainTextEdit.h"
 
 class Element : public QWidget
 {
@@ -104,7 +104,7 @@ EotCheck {
     border-top-right-radius: 8px;
 }
 
-ResizingPlainTextEdit {
+QPlainTextEdit {
     border: none;
     padding: 0px;
     margin: 0px;
@@ -122,7 +122,7 @@ ResizingPlainTextEdit {
 
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
-    ResizingPlainTextEdit* speechEdit_ = new ResizingPlainTextEdit(this);
+    QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
     EotCheck* eotCheck_ = new EotCheck(this);
 
     void initialize_()
@@ -131,6 +131,7 @@ ResizingPlainTextEdit {
         setAttribute(Qt::WA_StyledBackground, true);
         setStyleSheet(STYLE_SHEET);
         roleSelector_->setEditable(false);
+        speechEdit_->setAcceptDrops(false);
 
         editRole_->setText("Edit");
         addRole_->setText("Add");

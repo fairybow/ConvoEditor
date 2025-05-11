@@ -86,8 +86,5 @@
     <QtMoc Include="src\EotCheck.h">
       <Filter>Source Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\ResizingPlainTextEdit.h">
-      <Filter>Source Files</Filter>
-    </QtMoc>
   </ItemGroup>
 </Project>
