@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <QComboBox>
 #include <QObject>
@@ -73,3 +73,4 @@ private:
     bool old_;
     bool new_;
 };
+*/

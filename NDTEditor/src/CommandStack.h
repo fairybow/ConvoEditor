@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #include <memory>
 
@@ -116,3 +116,4 @@ private slots:
         }
     }
 };
+*/

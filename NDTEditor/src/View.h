@@ -17,8 +17,8 @@
 #include <QWidget>
 
 #include "AutoSizeTextEdit.h"
-#include "Command.h"
-#include "CommandStack.h"
+//#include "Command.h"
+//#include "CommandStack.h"
 #include "Element.h"
 #include "InsertButton.h"
 #include "Io.h"
@@ -37,10 +37,10 @@ public:
         initialize_();
     }
 
-    CommandStack* commandStack() const noexcept
+    /*CommandStack* commandStack() const noexcept
     {
         return commandStack_;
-    }
+    }*/
 
     bool load(const QString& path)
     {
@@ -164,7 +164,7 @@ private:
 
     QPointer<AutoSizeTextEdit> currentEdit_{};
 
-    CommandStack* commandStack_ = new CommandStack(this);
+    //CommandStack* commandStack_ = new CommandStack(this);
 
     void initialize_()
     {
@@ -273,7 +273,7 @@ private:
             &View::onElementDeleteRequested_
         );
 
-        auto eot_check = element->eotCheck();
+        /*auto eot_check = element->eotCheck();
 
         connect
         (
@@ -281,7 +281,7 @@ private:
             &EotCheck::toggled,
             this,
             [=](bool checked) { onElementEotCheckToggled_(eot_check, checked); }
-        );
+        );*/
     }
 
     InsertButton* insertInsertButton_(int position)
@@ -372,11 +372,11 @@ private:
         updateInsertButtonPositions_(position + 1);
     }
 
-    void onElementEotCheckToggled_(EotCheck* eotCheck, bool now)
+    /*void onElementEotCheckToggled_(EotCheck* eotCheck, bool now)
     {
         auto command = std::make_unique<EotCheckCommand>(eotCheck, !now, now);
         commandStack_->push(std::move(command));
-    }
+    }*/
 
 private slots:
     void onElementRoleChangeRequested_(const QString& from, const QString& to)
