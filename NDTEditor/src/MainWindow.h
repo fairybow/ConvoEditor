@@ -65,7 +65,7 @@ public:
             undo_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [&] { view_->undo(); }
         );
 
         connect
@@ -73,7 +73,7 @@ public:
             redo_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [&] { view_->redo(); }
         );
     }
 

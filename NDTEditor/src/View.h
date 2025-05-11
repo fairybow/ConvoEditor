@@ -125,6 +125,16 @@ public:
         currentEdit_->setFocus();
     }
 
+    void undo()
+    {
+        //...
+    }
+
+    void redo()
+    {
+        //...
+    }
+
 private:
     static constexpr auto EXPECTED = R"(
 {
