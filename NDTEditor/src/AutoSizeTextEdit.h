@@ -1,11 +1,14 @@
 #pragma once
 
+#include <QFocusEvent>
+#include <QMargins>
 #include <QResizeEvent>
+#include <QSize>
+#include <QTextCursor>
 #include <QTextDocument>
 #include <QTextEdit>
-#include <QSize>
-#include <QMargins>
 
+// Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
 {
     Q_OBJECT
@@ -50,11 +53,58 @@ public:
         updateHeight_();
     }
 
+    void trim()
+    {
+        auto current = toPlainText();
+        auto trimmed = current.trimmed();
+
+        // Only update if the text actually changed
+        if (current != trimmed)
+        {
+            // Save cursor position relative to non-whitespace content
+            auto cursor = textCursor();
+
+            auto original_cursor_pos = cursor.position();
+            auto leading_spaces = 0;
+
+            // Count leading whitespace in original text
+            for (auto i = 0; i < current.length() && current[i].isSpace(); ++i)
+            {
+                leading_spaces++;
+            }
+
+            // Set the trimmed text
+            setPlainText(trimmed);
+
+            // Adjust cursor position
+            if (original_cursor_pos > leading_spaces)
+            {
+                // Cursor was after leading whitespace
+                auto new_cursor_pos = original_cursor_pos - leading_spaces;
+                new_cursor_pos = qBound(0, new_cursor_pos, trimmed.length());
+                cursor.setPosition(new_cursor_pos);
+            }
+            else
+            {
+                // Cursor was in leading whitespace, move to beginning
+                cursor.setPosition(0);
+            }
+
+            setTextCursor(cursor);
+        }
+    }
+
 protected:
     virtual void resizeEvent(QResizeEvent* event) override
     {
         QTextEdit::resizeEvent(event);
         updateHeight_();
+    }
+
+    virtual void focusOutEvent(QFocusEvent* event) override
+    {
+        QTextEdit::focusOutEvent(event);
+        trim();
     }
 
 private slots:

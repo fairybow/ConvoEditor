@@ -1,16 +1,19 @@
 #pragma once
 
+#include <QApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QLayoutItem>
 #include <QList>
+#include <QPointer>
 #include <QScrollArea>
 #include <QString>
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "AutoSizeTextEdit.h"
 #include "Element.h"
 #include "InsertButton.h"
 #include "Io.h"
@@ -88,6 +91,8 @@ private:
     QList<QString> roleChoices_{};
     // Later, undo/redo stack QList<Snapshot>
 
+    QPointer<AutoSizeTextEdit> currentEdit_{};
+
     void initialize_()
     {
         //setAttribute(Qt::WA_StyledBackground, true);
@@ -108,6 +113,14 @@ private:
         elementsLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(elementsLayoutContainer_, Qt::AlignCenter);
 
         mainLayout_->addWidget(scrollArea_);
+
+        connect
+        (
+            qApp,
+            &QApplication::focusChanged,
+            this,
+            &View::onQAppFocusChanged_
+        );
     }
 
     LoadPlan parse_(const QJsonDocument& document)
@@ -290,5 +303,20 @@ private slots:
                 element->setRole(current);
             }
         }
+    }
+
+    void onQAppFocusChanged_(QWidget* old, QWidget* now)
+    {
+        constexpr auto to_edit = [](QWidget* w)
+            {
+                return qobject_cast<AutoSizeTextEdit*>(w);
+            };
+
+        if (auto edit = to_edit(old))
+            if (edit == currentEdit_)
+                currentEdit_ = nullptr;
+
+        if (auto edit = to_edit(now))
+            currentEdit_ = edit;
     }
 };

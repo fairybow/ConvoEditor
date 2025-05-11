@@ -6,6 +6,7 @@
 #include <QMainWindow>
 #include <QMimeData>
 #include <QStatusBar>
+#include <QToolButton>
 #include <QUrl>
 
 #include "View.h"
@@ -20,9 +21,40 @@ public:
     {
         setAcceptDrops(true);
         setCentralWidget(view_);
-        setStatusBar(new QStatusBar(this));
 
-        // connections, if even needed
+        save_->setText("Save");
+        autoEot_->setText("Auto EOT");
+        split_->setText("Split");
+
+        auto status_bar = new QStatusBar(this);
+        status_bar->addWidget(save_);
+        status_bar->addWidget(autoEot_);
+        status_bar->addWidget(split_);
+        setStatusBar(status_bar);
+
+        connect
+        (
+            save_,
+            &QToolButton::clicked,
+            this,
+            [&] {}
+        );
+
+        connect
+        (
+            autoEot_,
+            &QToolButton::clicked,
+            this,
+            [&] {}
+        );
+
+        connect
+        (
+            split_,
+            &QToolButton::clicked,
+            this,
+            [&] {}
+        );
     }
 
 protected:
@@ -72,4 +104,7 @@ protected:
 
 private:
     View* view_ = new View(this);
+    QToolButton* save_ = new QToolButton(this);
+    QToolButton* autoEot_ = new QToolButton(this);
+    QToolButton* split_ = new QToolButton(this);
 };
