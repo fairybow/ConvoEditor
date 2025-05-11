@@ -8,8 +8,10 @@
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QPlainTextEdit>
+#include <QResizeEvent>
 #include <QString>
 #include <QStringList>
+#include <QTextDocument>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -24,50 +26,7 @@ public:
     explicit Element(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        // Set properties
-        setStyleSheet(STYLE_SHEET);
-        editRole_->setText("Edit");
-        editRole_->setObjectName("Edit");
-        addRole_->setText("Add");
-        addRole_->setObjectName("Add");
-        roleSelector_->setEditable(false);
-        speechEdit_->setAcceptDrops(false);
-
-        roleSelector_->installEventFilter(this);
-        speechEdit_->installEventFilter(this);
-
-        // Set up layouts
-        mainLayout_ = new QVBoxLayout(this);
-        mainLayout_->setContentsMargins(0, 0, 0, 0);
-        mainLayout_->setSpacing(0);
-
-        topLayout_ = new QHBoxLayout;
-        topLayout_->setContentsMargins(0, 0, 0, 0);
-        topLayout_->setSpacing(0);
-
-        topLayout_->addWidget(editRole_, 0);
-        topLayout_->addWidget(addRole_, 0);
-        topLayout_->addWidget(roleSelector_, 0);
-        topLayout_->addWidget(eotCheck_, 0);
-
-        mainLayout_->addLayout(topLayout_, 0);
-        mainLayout_->addWidget(speechEdit_, 1);
-
-        connect
-        (
-            editRole_,
-            &QToolButton::clicked,
-            this,
-            &Element::onEditRoleClicked_
-        );
-
-        connect
-        (
-            addRole_,
-            &QToolButton::clicked,
-            this,
-            &Element::onAddRoleClicked_
-        );
+        initialize_();
     }
 
     virtual ~Element() override { qDebug() << __FUNCTION__; }
@@ -107,12 +66,21 @@ protected:
         return QWidget::eventFilter(watched, event);
     }
 
+    virtual void resizeEvent(QResizeEvent* event) override
+    {
+        QWidget::resizeEvent(event);
+        updateSpeechEditHeight_();
+    }
+
 private:
     static constexpr auto STYLE_SHEET = R"(
-QToolButton {
+Element {
     border: none;
     padding: 0px;
     margin: 0px;
+
+    background-color: red;
+    border-radius: 10px;
 }
 
 QToolButton#Edit {
@@ -132,6 +100,7 @@ QComboBox {
 
     background-color: orange;
     border-radius: 0px;
+    padding-left: 5px;
 }
 
 EotCheck {
@@ -164,6 +133,70 @@ QPlainTextEdit {
     QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
     EotCheck* eotCheck_ = new EotCheck(this);
 
+    void initialize_()
+    {
+        // Set properties
+        setAttribute(Qt::WA_StyledBackground, true);
+        setStyleSheet(STYLE_SHEET);
+        roleSelector_->setEditable(false);
+        speechEdit_->setAcceptDrops(false);
+
+        editRole_->setText("Edit");
+        addRole_->setText("Add");
+
+        editRole_->setObjectName("Edit");
+        addRole_->setObjectName("Add");
+
+        editRole_->setFixedHeight(25);
+        addRole_->setFixedHeight(25);
+        roleSelector_->setFixedHeight(25);
+        eotCheck_->setFixedHeight(25);
+
+        roleSelector_->installEventFilter(this);
+        speechEdit_->installEventFilter(this);
+
+        // Set up layouts
+        mainLayout_ = new QVBoxLayout(this);
+        mainLayout_->setContentsMargins(2, 2, 2, 2);
+        mainLayout_->setSpacing(0);
+
+        topLayout_ = new QHBoxLayout;
+        topLayout_->setContentsMargins(0, 0, 0, 0);
+        topLayout_->setSpacing(0);
+
+        topLayout_->addWidget(editRole_, 0);
+        topLayout_->addWidget(addRole_, 0);
+        topLayout_->addWidget(roleSelector_, 0);
+        topLayout_->addWidget(eotCheck_, 0);
+
+        mainLayout_->addLayout(topLayout_, 0);
+        mainLayout_->addWidget(speechEdit_, 1);
+
+        connect
+        (
+            editRole_,
+            &QToolButton::clicked,
+            this,
+            &Element::onEditRoleClicked_
+        );
+
+        connect
+        (
+            addRole_,
+            &QToolButton::clicked,
+            this,
+            &Element::onAddRoleClicked_
+        );
+
+        connect
+        (
+            speechEdit_,
+            &QPlainTextEdit::textChanged,
+            this,
+            [&] { updateSpeechEditHeight_(); }
+        );
+    }
+
     bool roleExists_(const QString& role) const
     {
         for (auto i = 0; i < roleSelector_->count(); ++i)
@@ -183,6 +216,22 @@ QPlainTextEdit {
             QLineEdit::Normal,
             currentText
         ).trimmed();
+    }
+
+    void updateSpeechEditHeight_()
+    {
+        // QTextDocument needs to know its width to calculate how many lines the
+        // text will wrap into. Without setting the width, the document might
+        // calculate height as if all text is on a single line
+        auto doc = speechEdit_->document();
+        doc->setTextWidth(speechEdit_->viewport()->width());
+
+        auto height = doc->size().toSize().height()
+            + speechEdit_->contentsMargins().top()
+            + speechEdit_->contentsMargins().bottom();
+
+        height = qBound(30, height, 200);
+        speechEdit_->setFixedHeight(height);
     }
 
 private slots:
