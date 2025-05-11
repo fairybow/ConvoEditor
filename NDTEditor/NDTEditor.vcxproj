@@ -35,6 +35,7 @@
     <ClInclude Include="src\Io.h" />
     <ClInclude Include="src\Keys.h" />
     <ClInclude Include="src\LoadPlan.h" />
+    <QtMoc Include="src\ResizingPlainTextEdit.h" />
     <ClInclude Include="src\Utility.h" />
     <QtMoc Include="src\Element.h" />
     <QtMoc Include="src\MainWindow.h" />

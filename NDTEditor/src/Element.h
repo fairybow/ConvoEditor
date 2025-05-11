@@ -7,16 +7,14 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QPlainTextEdit>
-#include <QResizeEvent>
 #include <QString>
 #include <QStringList>
-#include <QTextDocument>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
 
 #include "EotCheck.h"
+#include "ResizingPlainTextEdit.h"
 
 class Element : public QWidget
 {
@@ -66,12 +64,6 @@ protected:
         return QWidget::eventFilter(watched, event);
     }
 
-    virtual void resizeEvent(QResizeEvent* event) override
-    {
-        QWidget::resizeEvent(event);
-        updateSpeechEditHeight_();
-    }
-
 private:
     static constexpr auto STYLE_SHEET = R"(
 Element {
@@ -112,7 +104,7 @@ EotCheck {
     border-top-right-radius: 8px;
 }
 
-QPlainTextEdit {
+ResizingPlainTextEdit {
     border: none;
     padding: 0px;
     margin: 0px;
@@ -130,7 +122,7 @@ QPlainTextEdit {
 
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
-    QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
+    ResizingPlainTextEdit* speechEdit_ = new ResizingPlainTextEdit(this);
     EotCheck* eotCheck_ = new EotCheck(this);
 
     void initialize_()
@@ -139,7 +131,6 @@ QPlainTextEdit {
         setAttribute(Qt::WA_StyledBackground, true);
         setStyleSheet(STYLE_SHEET);
         roleSelector_->setEditable(false);
-        speechEdit_->setAcceptDrops(false);
 
         editRole_->setText("Edit");
         addRole_->setText("Add");
@@ -187,14 +178,6 @@ QPlainTextEdit {
             this,
             &Element::onAddRoleClicked_
         );
-
-        connect
-        (
-            speechEdit_,
-            &QPlainTextEdit::textChanged,
-            this,
-            [&] { updateSpeechEditHeight_(); }
-        );
     }
 
     bool roleExists_(const QString& role) const
@@ -216,22 +199,6 @@ QPlainTextEdit {
             QLineEdit::Normal,
             currentText
         ).trimmed();
-    }
-
-    void updateSpeechEditHeight_()
-    {
-        // QTextDocument needs to know its width to calculate how many lines the
-        // text will wrap into. Without setting the width, the document might
-        // calculate height as if all text is on a single line
-        auto doc = speechEdit_->document();
-        doc->setTextWidth(speechEdit_->viewport()->width());
-
-        auto height = doc->size().toSize().height()
-            + speechEdit_->contentsMargins().top()
-            + speechEdit_->contentsMargins().bottom();
-
-        height = qBound(30, height, 200);
-        speechEdit_->setFixedHeight(height);
     }
 
 private slots:
