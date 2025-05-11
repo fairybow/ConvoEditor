@@ -87,6 +87,7 @@ private:
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
         speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
+        speechEdit_->setUndoRedoEnabled(false);
 
         editRole_->setText("Edit");
         addRole_->setText("Add");
