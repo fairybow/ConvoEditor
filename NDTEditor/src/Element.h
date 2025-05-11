@@ -17,6 +17,10 @@
 #include "EotCheck.h"
 #include "Utility.h"
 
+// For role removal, we would want a pop-up that asks what to set all roles
+// assigned to the removed role to. If we want to assign them to a new role, we
+// can just redirect to edit role name
+
 class Element : public QWidget
 {
     Q_OBJECT
@@ -37,6 +41,7 @@ public:
     bool eot() const { return eotCheck_->isChecked(); }
     void setEot(bool eot) { eotCheck_->setChecked(eot); }
     AutoSizeTextEdit* speechEdit() const noexcept { return speechEdit_; }
+    EotCheck* eotCheck() const noexcept { return eotCheck_; }
 
     void setRoleChoices(const QStringList& roles)
     {
@@ -86,6 +91,7 @@ private:
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
         speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
+        //speechEdit_->setUndoRedoEnabled(false);
 
         editRole_->setText("Edit");
         addRole_->setText("Add");

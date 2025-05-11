@@ -9,6 +9,7 @@
 #include <QToolButton>
 #include <QUrl>
 
+//#include "CommandStack.h"
 #include "View.h"
 
 class MainWindow : public QMainWindow
@@ -25,15 +26,18 @@ public:
         save_->setText("Save");
         autoEot_->setText("Auto EOT");
         split_->setText("Split");
-        undo_->setText("Undo");
-        redo_->setText("Redo");
+        //undo_->setText("Undo");
+        //redo_->setText("Redo");
+
+        //undo_->setEnabled(false);
+        //redo_->setEnabled(false);
 
         auto status_bar = new QStatusBar(this);
         status_bar->addWidget(save_);
         status_bar->addWidget(autoEot_);
         status_bar->addWidget(split_);
-        status_bar->addWidget(undo_);
-        status_bar->addWidget(redo_);
+        //status_bar->addWidget(undo_);
+        //status_bar->addWidget(redo_);
         setStatusBar(status_bar);
 
         connect
@@ -60,12 +64,14 @@ public:
             [&] { view_->split(); }
         );
 
+        /*auto view_command_stack = view_->commandStack();
+
         connect
         (
             undo_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [=] { view_command_stack->undo(); }
         );
 
         connect
@@ -73,8 +79,24 @@ public:
             redo_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [=] { view_command_stack->redo(); }
         );
+
+        connect
+        (
+            view_command_stack,
+            &CommandStack::canUndoChanged,
+            undo_,
+            &QToolButton::setEnabled
+        );
+
+        connect
+        (
+            view_command_stack,
+            &CommandStack::canRedoChanged,
+            redo_,
+            &QToolButton::setEnabled
+        );*/
     }
 
 protected:
@@ -127,6 +149,6 @@ private:
     QToolButton* save_ = new QToolButton(this);
     QToolButton* autoEot_ = new QToolButton(this);
     QToolButton* split_ = new QToolButton(this);
-    QToolButton* undo_ = new QToolButton(this);
-    QToolButton* redo_ = new QToolButton(this);
+    //QToolButton* undo_ = new QToolButton(this);
+    //QToolButton* redo_ = new QToolButton(this);
 };
