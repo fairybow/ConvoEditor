@@ -59,6 +59,22 @@ public:
             this,
             [&] { view_->split(); }
         );
+
+        connect
+        (
+            undo_,
+            &QToolButton::clicked,
+            this,
+            [&] {}
+        );
+
+        connect
+        (
+            redo_,
+            &QToolButton::clicked,
+            this,
+            [&] {}
+        );
     }
 
 protected:
