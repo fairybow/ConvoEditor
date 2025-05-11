@@ -6,7 +6,7 @@
 #include "Element.h"
 
 /// @warning These function more as a record (or a command-on-redo-only). We are
-/// not intercepting user input, merely observing and recording
+/// not intercepting user input, merely observing and recording for reuse
 class Command : public QObject
 {
     Q_OBJECT
