@@ -1,11 +1,11 @@
 #pragma once
 
-#pragma once
-
 #include <QCheckBox>
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QWidget>
+
+#include "Utility.h"
 
 class EotCheck : public QWidget
 {
@@ -20,11 +20,7 @@ public:
         checkBox_->setLayoutDirection(Qt::RightToLeft);
         checkBox_->setText("End of turn:");
 
-        auto layout = new QHBoxLayout(this);
-        layout->setAlignment(Qt::AlignCenter);
-        layout->setContentsMargins(0, 0, 0, 0);
-        layout->setSpacing(0);
-
+        auto layout = Utility::zeroPaddedLayout<QHBoxLayout>(this, Qt::AlignCenter);
         layout->addWidget(checkBox_);
     }
 

@@ -7,14 +7,15 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
-#include <QPlainTextEdit>
 #include <QString>
 #include <QStringList>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "AutoSizeTextEdit.h"
 #include "EotCheck.h"
+#include "Utility.h"
 
 class Element : public QWidget
 {
@@ -72,7 +73,7 @@ private:
 
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
-    QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
+    AutoSizeTextEdit* speechEdit_ = new AutoSizeTextEdit(this);
     EotCheck* eotCheck_ = new EotCheck(this);
 
     void initialize_()
@@ -98,13 +99,8 @@ private:
         speechEdit_->installEventFilter(this);
 
         // Set up layouts
-        mainLayout_ = new QVBoxLayout(this);
-        mainLayout_->setContentsMargins(2, 2, 2, 2);
-        mainLayout_->setSpacing(0);
-
-        topLayout_ = new QHBoxLayout;
-        topLayout_->setContentsMargins(0, 0, 0, 0);
-        topLayout_->setSpacing(0);
+        mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this);
+        topLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
 
         topLayout_->addWidget(editRole_, 0);
         topLayout_->addWidget(addRole_, 0);

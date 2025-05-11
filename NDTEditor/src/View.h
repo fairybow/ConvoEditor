@@ -102,12 +102,9 @@ private:
         scrollArea_->setWidget(elementsLayoutContainer_);
 
         // Set up layouts
-        mainLayout_ = new QVBoxLayout(this);
-        //mainLayout_->setContentsMargins(0, 0, 0, 0);
-        elementsLayout_ = new QVBoxLayout(elementsLayoutContainer_);
-        //elementsLayout_->setContentsMargins(0, 0, 0, 0);
-        elementsLayout_->setAlignment(Qt::AlignCenter);
-        elementsLayout_->setSpacing(0);
+        mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this, Qt::AlignCenter);
+        elementsLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(elementsLayoutContainer_, Qt::AlignCenter);
+
         mainLayout_->addWidget(scrollArea_);
     }
 
@@ -173,17 +170,16 @@ private:
         );
     }
 
-    /// TESTING ------------------------------------------------------
-    /// --------------------------------------------------------------
-    /// --------------------------------------------------------------
-    /// --------------------------------------------------------------
-
     InsertButton* insertInsertButton_(int position)
     {
         auto button_container = new QWidget(elementsLayoutContainer_);
-        auto container_layout = new QHBoxLayout(button_container);
-        container_layout->setAlignment(Qt::AlignCenter);
-        container_layout->setContentsMargins(1, 6, 1, 6);
+
+        auto container_layout = Utility::newLayout<QHBoxLayout>
+            (
+                { 1, 6, 1, 6 }, 0,
+                button_container,
+                Qt::AlignCenter
+            );
 
         auto button = new InsertButton(position, button_container);
         insertButtons_.insert(position, button);
@@ -257,11 +253,6 @@ private:
         insertInsertButton_(position + 1);
         updateInsertButtonPositions_(position + 1);
     }
-
-    /// --------------------------------------------------------------
-    /// --------------------------------------------------------------
-    /// --------------------------------------------------------------
-    /// --------------------------------------------------------------
 
 private slots:
     void onElementRoleChangeRequested_(const QString& from, const QString& to)
