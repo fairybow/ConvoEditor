@@ -20,6 +20,9 @@ public:
     virtual ~Command() = default;
     virtual void execute() = 0;
     virtual void undo() = 0;
+
+signals:
+    void subjectDestroyed(Command*);
 };
 
 class EotCheckCommand : public Command
