@@ -72,6 +72,9 @@
     <ClInclude Include="src\Utility.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Command.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\MainWindow.h">

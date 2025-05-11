@@ -15,6 +15,7 @@
 #include <QWidget>
 
 #include "AutoSizeTextEdit.h"
+#include "Command.h"
 #include "Element.h"
 #include "InsertButton.h"
 #include "Io.h"
@@ -162,9 +163,10 @@ private:
     QList<Element*> elements_{};
     QList<InsertButton*> insertButtons_{};
     QList<QString> roleChoices_{};
-    // Later, undo/redo stack QList<Snapshot>
 
     QPointer<AutoSizeTextEdit> currentEdit_{};
+
+    //QList<Command> commands_{}; // ptr or no?
 
     void initialize_()
     {
