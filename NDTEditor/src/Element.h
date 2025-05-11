@@ -37,6 +37,7 @@ public:
     bool eot() const { return eotCheck_->isChecked(); }
     void setEot(bool eot) { eotCheck_->setChecked(eot); }
     AutoSizeTextEdit* speechEdit() const noexcept { return speechEdit_; }
+    EotCheck* eotCheck() const noexcept { return eotCheck_; }
 
     void setRoleChoices(const QStringList& roles)
     {

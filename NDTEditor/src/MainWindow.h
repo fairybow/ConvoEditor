@@ -9,6 +9,7 @@
 #include <QToolButton>
 #include <QUrl>
 
+#include "CommandStack.h"
 #include "View.h"
 
 class MainWindow : public QMainWindow
@@ -27,6 +28,9 @@ public:
         split_->setText("Split");
         undo_->setText("Undo");
         redo_->setText("Redo");
+
+        undo_->setEnabled(false);
+        redo_->setEnabled(false);
 
         auto status_bar = new QStatusBar(this);
         status_bar->addWidget(save_);
@@ -60,12 +64,14 @@ public:
             [&] { view_->split(); }
         );
 
+        auto view_command_stack = view_->commandStack();
+
         connect
         (
             undo_,
             &QToolButton::clicked,
             this,
-            [&] { view_->undo(); }
+            [=] { view_command_stack->undo(); }
         );
 
         connect
@@ -73,7 +79,23 @@ public:
             redo_,
             &QToolButton::clicked,
             this,
-            [&] { view_->redo(); }
+            [=] { view_command_stack->redo(); }
+        );
+
+        connect
+        (
+            view_command_stack,
+            &CommandStack::canUndoChanged,
+            undo_,
+            &QToolButton::setEnabled
+        );
+
+        connect
+        (
+            view_command_stack,
+            &CommandStack::canRedoChanged,
+            redo_,
+            &QToolButton::setEnabled
         );
     }
 

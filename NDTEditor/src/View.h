@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include <QApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -16,6 +18,7 @@
 
 #include "AutoSizeTextEdit.h"
 #include "Command.h"
+#include "CommandStack.h"
 #include "Element.h"
 #include "InsertButton.h"
 #include "Io.h"
@@ -32,6 +35,11 @@ public:
         : QWidget(parent)
     {
         initialize_();
+    }
+
+    CommandStack* commandStack() const noexcept
+    {
+        return commandStack_;
     }
 
     bool load(const QString& path)
@@ -126,16 +134,6 @@ public:
         currentEdit_->setFocus();
     }
 
-    void undo()
-    {
-        //...
-    }
-
-    void redo()
-    {
-        //...
-    }
-
 private:
     static constexpr auto EXPECTED = R"(
 {
@@ -166,7 +164,7 @@ private:
 
     QPointer<AutoSizeTextEdit> currentEdit_{};
 
-    //QList<Command> commands_{}; // ptr or no?
+    CommandStack* commandStack_ = new CommandStack(this);
 
     void initialize_()
     {
@@ -274,6 +272,14 @@ private:
             this,
             &View::onElementDeleteRequested_
         );
+
+        connect
+        (
+            element->eotCheck(),
+            &EotCheck::toggled,
+            this,
+            [=](bool checked) { onElementEotCheckToggled_(element, checked); }
+        );
     }
 
     InsertButton* insertInsertButton_(int position)
@@ -362,6 +368,12 @@ private:
 
         insertInsertButton_(position + 1);
         updateInsertButtonPositions_(position + 1);
+    }
+
+    void onElementEotCheckToggled_(Element* element, bool now)
+    {
+        auto command = std::make_unique<EotCheckCommand>(element, !now, now);
+        commandStack_->push(std::move(command));
     }
 
 private slots:

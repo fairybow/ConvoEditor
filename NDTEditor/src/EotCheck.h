@@ -22,12 +22,23 @@ public:
 
         auto layout = Utility::zeroPaddedLayout<QHBoxLayout>(this, Qt::AlignCenter);
         layout->addWidget(checkBox_);
+
+        connect
+        (
+            checkBox_,
+            &QCheckBox::toggled,
+            this,
+            [&](bool checked) { emit toggled(checked); }
+        );
     }
 
     virtual ~EotCheck() override { qDebug() << __FUNCTION__; }
 
     bool isChecked() const { return checkBox_->isChecked(); }
     void setChecked(bool checked) { checkBox_->setChecked(checked); }
+
+signals:
+    void toggled(bool checked);
 
 private:
     QCheckBox* checkBox_ = new QCheckBox(this);
