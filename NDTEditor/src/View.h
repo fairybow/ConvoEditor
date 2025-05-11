@@ -167,26 +167,6 @@ private:
         );
     }
 
-    /*void populate_(const LoadPlan& plan)
-    {
-        roleChoices_ = plan.roles();
-
-        for (auto& item : plan.items())
-        {
-            auto element = new Element(elementsLayoutContainer_);
-            elements_ << element;
-
-            element->setRoleChoices(roleChoices_);
-
-            element->setRole(item.role);
-            element->setSpeech(item.speech);
-            element->setEot(item.eot);
-
-            elementsLayout_->addWidget(element);
-            connectElement_(element);
-        }
-    }*/
-
     /// TESTING ------------------------------------------------------
     /// --------------------------------------------------------------
     /// --------------------------------------------------------------

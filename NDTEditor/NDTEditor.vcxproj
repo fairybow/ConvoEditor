@@ -31,6 +31,7 @@
   <ItemGroup>
     <ClInclude Include="old\OLDElementBlock.h" />
     <QtMoc Include="src\InsertButton.h" />
+    <QtMoc Include="src\EotCheck.h" />
     <ClInclude Include="src\Io.h" />
     <ClInclude Include="src\Keys.h" />
     <ClInclude Include="src\LoadPlan.h" />

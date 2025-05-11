@@ -14,6 +14,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "EotCheck.h"
+
 class Element : public QWidget
 {
     Q_OBJECT
@@ -23,8 +25,11 @@ public:
         : QWidget(parent)
     {
         // Set properties
+        setStyleSheet(STYLE_SHEET);
         editRole_->setText("Edit");
+        editRole_->setObjectName("Edit");
         addRole_->setText("Add");
+        addRole_->setObjectName("Add");
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
 
@@ -33,14 +38,20 @@ public:
 
         // Set up layouts
         mainLayout_ = new QVBoxLayout(this);
-        //mainLayout_->setContentsMargins(0, 0, 0, 0);
+        mainLayout_->setContentsMargins(0, 0, 0, 0);
+        mainLayout_->setSpacing(0);
+
         topLayout_ = new QHBoxLayout;
+        topLayout_->setContentsMargins(0, 0, 0, 0);
+        topLayout_->setSpacing(0);
+
         topLayout_->addWidget(editRole_, 0);
         topLayout_->addWidget(addRole_, 0);
-        topLayout_->addWidget(roleSelector_, 1);
-        topLayout_->addWidget(eotSelector_, 0);
+        topLayout_->addWidget(roleSelector_, 0);
+        topLayout_->addWidget(eotCheck_, 0);
+
         mainLayout_->addLayout(topLayout_, 0);
-        mainLayout_->addWidget(speechEdit_, 0);
+        mainLayout_->addWidget(speechEdit_, 1);
 
         connect
         (
@@ -65,8 +76,8 @@ public:
     void setRole(const QString& role) { roleSelector_->setCurrentText(role); }
     QString speech() const { return speechEdit_->toPlainText(); }
     void setSpeech(const QString& speech) { speechEdit_->setPlainText(speech); }
-    bool eot() const { return eotSelector_->isChecked(); }
-    void setEot(bool eot) { eotSelector_->setChecked(eot); }
+    bool eot() const { return eotCheck_->isChecked(); }
+    void setEot(bool eot) { eotCheck_->setChecked(eot); }
 
     void setRoleChoices(const QStringList& roles)
     {
@@ -97,6 +108,52 @@ protected:
     }
 
 private:
+    static constexpr auto STYLE_SHEET = R"(
+QToolButton {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+QToolButton#Edit {
+    background-color: goldenrod;
+    border-top-left-radius: 8px;
+}
+
+QToolButton#Add {
+    background-color: cadetblue;
+    border-radius: 0px;
+}
+
+QComboBox {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: orange;
+    border-radius: 0px;
+}
+
+EotCheck {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: pink;
+    border-top-right-radius: 8px;
+}
+
+QPlainTextEdit {
+    border: none;
+    padding: 0px;
+    margin: 0px;
+
+    background-color: skyblue;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+)";
+
     QVBoxLayout* mainLayout_ = nullptr;
     QHBoxLayout* topLayout_ = nullptr;
     QToolButton* editRole_ = new QToolButton(this);
@@ -105,7 +162,7 @@ private:
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
     QPlainTextEdit* speechEdit_ = new QPlainTextEdit(this);
-    QCheckBox* eotSelector_ = new QCheckBox(this);
+    EotCheck* eotCheck_ = new EotCheck(this);
 
     bool roleExists_(const QString& role) const
     {

@@ -83,5 +83,8 @@
     <QtMoc Include="src\InsertButton.h">
       <Filter>Source Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\EotCheck.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>
