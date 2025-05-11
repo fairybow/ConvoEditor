@@ -15,7 +15,7 @@ public:
     explicit EotCheck(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        setAttribute(Qt::WA_StyledBackground, true);
+        //setAttribute(Qt::WA_StyledBackground, true);
 
         checkBox_->setLayoutDirection(Qt::RightToLeft);
         checkBox_->setText("End of turn:");

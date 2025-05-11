@@ -65,56 +65,6 @@ protected:
     }
 
 private:
-    static constexpr auto STYLE_SHEET = R"(
-Element {
-    border: none;
-    padding: 0px;
-    margin: 0px;
-
-    background-color: red;
-    border-radius: 10px;
-}
-
-QToolButton#Edit {
-    background-color: goldenrod;
-    border-top-left-radius: 8px;
-}
-
-QToolButton#Add {
-    background-color: cadetblue;
-    border-radius: 0px;
-}
-
-QComboBox {
-    border: none;
-    padding: 0px;
-    margin: 0px;
-
-    background-color: orange;
-    border-radius: 0px;
-    padding-left: 5px;
-}
-
-EotCheck {
-    border: none;
-    padding: 0px;
-    margin: 0px;
-
-    background-color: pink;
-    border-top-right-radius: 8px;
-}
-
-QPlainTextEdit {
-    border: none;
-    padding: 0px;
-    margin: 0px;
-
-    background-color: skyblue;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-}
-)";
-
     QVBoxLayout* mainLayout_ = nullptr;
     QHBoxLayout* topLayout_ = nullptr;
     QToolButton* editRole_ = new QToolButton(this);
@@ -128,10 +78,10 @@ QPlainTextEdit {
     void initialize_()
     {
         // Set properties
-        setAttribute(Qt::WA_StyledBackground, true);
-        setStyleSheet(STYLE_SHEET);
+        //setAttribute(Qt::WA_StyledBackground, true);
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
+        speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
 
         editRole_->setText("Edit");
         addRole_->setText("Add");

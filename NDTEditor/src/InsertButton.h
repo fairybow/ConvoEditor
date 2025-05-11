@@ -1,31 +1,21 @@
 #pragma once
 
 #include <QDebug>
-#include <QHBoxLayout>
 #include <QToolButton>
 #include <QWidget>
 
-class InsertButton : public QWidget
+class InsertButton : public QToolButton
 {
     Q_OBJECT
 
 public:
     explicit InsertButton(int position, QWidget* parent = nullptr)
-        : QWidget(parent)
+        : QToolButton(parent)
         , position_(position)
     {
-        auto layout = new QHBoxLayout(this);
-        layout->setAlignment(Qt::AlignCenter);
-        layout->setContentsMargins(0, 5, 0, 5);
-
-        button_->setText("+");
-        button_->setFixedSize(30, 30);
-
-        layout->addWidget(button_);
-
         connect
         (
-            button_,
+            this,
             &QToolButton::clicked,
             this,
             [&] { emit insertRequested(position_); }
@@ -42,5 +32,4 @@ signals:
 
 private:
     int position_;
-    QToolButton* button_ = new QToolButton(this);
 };

@@ -38,6 +38,9 @@
     <None Include="docs\Diagram.puml">
       <Filter>Docs</Filter>
     </None>
+    <None Include="old\TestQSS.qss">
+      <Filter>Old</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">

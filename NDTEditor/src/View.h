@@ -90,6 +90,11 @@ private:
 
     void initialize_()
     {
+        //setAttribute(Qt::WA_StyledBackground, true);
+        //scrollArea_->setStyleSheet("background: transparent;");
+        //scrollArea_->viewport()->setStyleSheet("background: transparent;");
+        //elementsLayoutContainer_->setStyleSheet("background: transparent;");
+
         // Scroll area setup
         scrollArea_->setWidgetResizable(true);
         scrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -100,7 +105,8 @@ private:
         mainLayout_ = new QVBoxLayout(this);
         //mainLayout_->setContentsMargins(0, 0, 0, 0);
         elementsLayout_ = new QVBoxLayout(elementsLayoutContainer_);
-        elementsLayout_->setAlignment(Qt::AlignTop);
+        //elementsLayout_->setContentsMargins(0, 0, 0, 0);
+        elementsLayout_->setAlignment(Qt::AlignCenter);
         elementsLayout_->setSpacing(0);
         mainLayout_->addWidget(scrollArea_);
     }
@@ -174,11 +180,21 @@ private:
 
     InsertButton* insertInsertButton_(int position)
     {
-        auto button = new InsertButton(position, elementsLayoutContainer_);
+        auto button_container = new QWidget(elementsLayoutContainer_);
+        auto container_layout = new QHBoxLayout(button_container);
+        container_layout->setAlignment(Qt::AlignCenter);
+        container_layout->setContentsMargins(1, 6, 1, 6);
+
+        auto button = new InsertButton(position, button_container);
         insertButtons_.insert(position, button);
 
+        container_layout->addWidget(button);
+
         // Button at position n goes at layout index n * 2
-        elementsLayout_->insertWidget((position * 2), button);
+        elementsLayout_->insertWidget((position * 2), button_container);
+
+        button->setText("+");
+        button->setFixedSize(25, 25);
 
         connect
         (
