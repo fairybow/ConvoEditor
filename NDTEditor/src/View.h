@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+//#include <memory>
 
 #include <QApplication>
 #include <QJsonArray>
@@ -70,6 +70,11 @@ public:
         insertButtons_ = old_insert_buttons;
         roleChoices_ = old_role_choices;
         return false;
+    }
+
+    bool save()
+    {
+
     }
 
     void split()
@@ -223,6 +228,11 @@ private:
         }
 
         return plan;
+    }
+
+    QJsonDocument compile_()
+    {
+
     }
 
     // Clears element and insert button container widgets
