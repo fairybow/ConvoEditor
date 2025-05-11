@@ -102,6 +102,8 @@ private:
         scrollArea_->setWidget(elementsLayoutContainer_);
 
         // Set up layouts
+        // Align center causes widgets to take up their preferred size rather
+        // than stretching to fill the available width
         mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this, Qt::AlignCenter);
         elementsLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(elementsLayoutContainer_, Qt::AlignCenter);
 
