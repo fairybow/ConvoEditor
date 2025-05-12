@@ -565,6 +565,9 @@ private slots:
 
         // Unsure whether to use new_element_index > -1 or new_element_index > 0
         if (i > -1 && new_element_index > -1)
-            insertElement_(new_element_index, { roleChoices_.at(i - 1) });
+        {
+            auto interruption_index = insertElement_(new_element_index, { roleChoices_.at(i - 1) });
+            elements_.at(static_cast<qsizetype>(interruption_index - 1))->setEot(false);
+        }
     }
 };
