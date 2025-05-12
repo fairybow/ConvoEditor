@@ -9,6 +9,7 @@
 #include <QTextDocument>
 #include <QTextEdit>
 
+// Turn off scrolling
 // Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
 {
