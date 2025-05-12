@@ -4,6 +4,9 @@
 #include <QKeyEvent>
 #include <QMargins>
 #include <QMouseEvent>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QObject>
 #include <QResizeEvent>
 #include <QSize>
 #include <QTextCursor>
@@ -11,6 +14,71 @@
 #include <QTextEdit>
 #include <QTimer>
 #include <QWheelEvent>
+
+// Nest, rename to Global, and move to cpp when we un-header all this
+class AutoSizeTextEditGlobal : public QObject
+{
+    Q_OBJECT
+
+public:
+    static AutoSizeTextEditGlobal& instance()
+    {
+        // C++ 11 guarantees that this initialization is thread-safe
+        static AutoSizeTextEditGlobal self;
+        return self;
+    }
+
+    int mmbHeldKey() const
+    {
+        QMutexLocker locker(&mutex_);
+        return mmbHeldKey_;
+    }
+
+    void setMmbHeldKey(int mmbHeldKey)
+    {
+        QMutexLocker locker(&mutex_);
+        mmbHeldKey_ = mmbHeldKey;
+    }
+
+    void mmbHeldKeyDebounce()
+    {
+        QMutexLocker locker(&mutex_);
+        mmbHeldKeyDebouncer_.start(300);
+    }
+
+    bool mmbHeldKeyDebouncerIsActive() const
+    {
+        QMutexLocker locker(&mutex_);
+        return mmbHeldKeyDebouncer_.isActive();
+    }
+
+private:
+    mutable QMutex mutex_;
+    QTimer mmbHeldKeyDebouncer_;
+    int mmbHeldKey_ = -1;
+
+    AutoSizeTextEditGlobal()
+        : QObject(nullptr)
+    {
+        mmbHeldKeyDebouncer_.setSingleShot(true);
+
+        connect
+        (
+            &mmbHeldKeyDebouncer_,
+            &QTimer::timeout,
+            this,
+            [&]
+            {
+                QMutexLocker locker(&mutex_);
+                mmbHeldKey_ = -1;
+            }
+        );
+    }
+
+    ~AutoSizeTextEditGlobal() = default;
+    AutoSizeTextEditGlobal(const AutoSizeTextEditGlobal&) = delete;
+    AutoSizeTextEditGlobal& operator=(const AutoSizeTextEditGlobal&) = delete;
+};
 
 // Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
@@ -46,18 +114,6 @@ public:
             &QTextDocument::contentsChanged,
             this,
             &AutoSizeTextEdit::updateHeight_
-        );
-
-        /// WELP: we also want to debounce other editors, because we will be
-        /// switching focus when we use the MMB gesture.
-        mmbHeldKeyDebouncer_.setSingleShot(true);
-
-        connect
-        (
-            &mmbHeldKeyDebouncer_,
-            &QTimer::timeout,
-            this,
-            [&] { mmbHeldKey_ = -1; }
         );
 
         // Initial configuration
@@ -177,7 +233,10 @@ protected:
         else if (event->button() == Qt::MiddleButton)
         {
             mmbPressed_ = false;
-            emit middleClickReleased(mmbHeldKey_);
+
+            auto& global = AutoSizeTextEditGlobal::instance();
+            auto held_key = global.mmbHeldKey();
+            emit middleClickReleased(held_key);
 
             // When a key is held, it will auto-repeat. So, the press & release
             // events will continuously fire one after the other. We can't rely
@@ -185,8 +244,8 @@ protected:
             // block mmbHeldKey_ till its release. Blocking this prevents the
             // awkward "I accidentally typed my gesture key because I released
             // MMB a little early" issue
-            if (mmbHeldKey_ > -1)
-                mmbHeldKeyDebouncer_.start(DEBOUNCE_INTERVAL);
+            if (held_key > -1)
+                global.mmbHeldKeyDebounce(); // maybeDebounce()? Pack more of the conditionals into Global?
         }
 
         QTextEdit::mouseReleaseEvent(event);
@@ -195,17 +254,18 @@ protected:
     virtual void keyPressEvent(QKeyEvent* event) override
     {
         auto key = event->key();
+        auto& global = AutoSizeTextEditGlobal::instance();
 
         if (mmbPressed_)
         {
-            mmbHeldKey_ = key;
+            global.setMmbHeldKey(key);
             event->ignore();
             return;
         }
 
-        if (key == mmbHeldKey_ && mmbHeldKeyDebouncer_.isActive())
+        if (key == global.mmbHeldKey() && global.mmbHeldKeyDebouncerIsActive())
         {
-            mmbHeldKeyDebouncer_.start(DEBOUNCE_INTERVAL);
+            global.mmbHeldKeyDebounce();
             event->ignore();
             return;
         }
@@ -232,9 +292,6 @@ private:
     bool lmbPressed_ = false;
     bool mmbPressed_ = false;
     bool rmbPressed_ = false;
-    int mmbHeldKey_ = -1;
-    static constexpr auto DEBOUNCE_INTERVAL = 300;
-    QTimer mmbHeldKeyDebouncer_{};
 
 private slots:
     void updateHeight_()
