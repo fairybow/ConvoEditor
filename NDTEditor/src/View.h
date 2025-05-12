@@ -12,6 +12,7 @@
 #include <QList>
 #include <QPointer>
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QString>
 #include <QTextCursor>
 #include <QVBoxLayout>
@@ -64,6 +65,7 @@ public:
             currentPath_ = path;
             clearAllWidgets_();
             populate_(plan);
+            scrollArea_->verticalScrollBar()->setValue(0);
             emit documentLoaded();
             return true;
         }
