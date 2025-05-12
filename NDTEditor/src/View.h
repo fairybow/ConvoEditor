@@ -78,6 +78,9 @@ public:
     {
         if (currentPath_.isEmpty()) return false;
 
+        if (currentEdit_)
+            currentEdit_->trim();
+
         auto document = compile_();
         if (document.isNull()) return false;
         return Io::write(document, currentPath_);
