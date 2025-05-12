@@ -9,6 +9,7 @@
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QTimer>
 #include <QWheelEvent>
 
 // Why doesn't this work with QPlainTextEdit?
@@ -45,6 +46,15 @@ public:
             &QTextDocument::contentsChanged,
             this,
             &AutoSizeTextEdit::updateHeight_
+        );
+
+        mmbHeldKeyDebouncer_.setSingleShot(true);
+        connect
+        (
+            &mmbHeldKeyDebouncer_,
+            &QTimer::timeout,
+            this,
+            [&] { mmbHeldKey_ = -1; }
         );
 
         // Initial configuration
@@ -123,8 +133,6 @@ protected:
 
     virtual void mousePressEvent(QMouseEvent* event) override
     {
-        qDebug() << __FUNCTION__;
-
         if (event->button() == Qt::LeftButton)
         {
             if (rmbPressed_)
@@ -159,8 +167,6 @@ protected:
 
     virtual void mouseReleaseEvent(QMouseEvent* event) override
     {
-        qDebug() << __FUNCTION__;
-
         if (event->button() == Qt::LeftButton)
             lmbPressed_ = false;
         else if (event->button() == Qt::RightButton)
@@ -168,8 +174,16 @@ protected:
         else if (event->button() == Qt::MiddleButton)
         {
             mmbPressed_ = false;
-            emit middleClickReleased(mmbGestureKey_);
-            // We still need to block mmbGestureKey_ till its release
+            emit middleClickReleased(mmbHeldKey_);
+
+            // When a key is held, it will auto-repeat. So, the press & release
+            // events will continuously fire one after the other. We can't rely
+            // on keyReleaseEvent for our exit condition, and we still need to
+            // block mmbHeldKey_ till its release. Blocking this prevents the
+            // awkward "I accidentally typed my gesture key because I released
+            // MMB a little early" issue
+            if (mmbHeldKey_ > -1)
+                mmbHeldKeyDebouncer_.start(DEBOUNCE_INTERVAL);
         }
 
         QTextEdit::mouseReleaseEvent(event);
@@ -177,22 +191,18 @@ protected:
 
     virtual void keyPressEvent(QKeyEvent* event) override
     {
-        qDebug() << __FUNCTION__;
-
         auto key = event->key();
 
-        // Let's not print the key when holding the button!
-        // BUT, we also need to stop printing if we're still holding the key after releasing middle mouse
         if (mmbPressed_)
         {
-            mmbGestureKey_ = key;
+            mmbHeldKey_ = key;
             event->ignore();
             return;
         }
 
-        // Check if we have any blocked keys (held for a gesture)
-        if (mmbGestureKey_ > -1)
+        if (key == mmbHeldKey_ && mmbHeldKeyDebouncer_.isActive())
         {
+            mmbHeldKeyDebouncer_.start(DEBOUNCE_INTERVAL);
             event->ignore();
             return;
         }
@@ -210,38 +220,25 @@ protected:
         }
     }
 
-    /// The core bug here is that a key held will be continuously sending
-    /// keyPressEvent, keyReleaseEvent. So, a held key is continuously
-    /// "released" as well. This will trigger our exit condition for the held
-    /// gesture key without us having ever let go of it. Thus, our code doesn't
-    /// work for preventing the held gesture key from being printed in the text
-    /// field over and over after releasing MMB.
-
-    virtual void keyReleaseEvent(QKeyEvent* event) override
-    {
-        qDebug() << __FUNCTION__;
-
-        auto key = event->key();
-
-        if (mmbGestureKey_ > -1 && !mmbPressed_)
-        {
-            mmbGestureKey_ = -1;
-            event->ignore();
-            return;
-        }
-
-        QTextEdit::keyReleaseEvent(event);
-    }
+    //virtual void keyReleaseEvent(QKeyEvent* event) override
+    //{
+    //    QTextEdit::keyReleaseEvent(event);
+    //}
 
 private:
     bool lmbPressed_ = false;
     bool mmbPressed_ = false;
     bool rmbPressed_ = false;
-    int mmbGestureKey_ = -1;
+    int mmbHeldKey_ = -1;
+    static constexpr auto DEBOUNCE_INTERVAL = 300;
+    QTimer mmbHeldKeyDebouncer_{};
 
 private slots:
     void updateHeight_()
     {
+        // There's some extra space below the text. However, for now, it seems
+        // preventing scrolling makes this not an issue
+
         // Get the document's size for the current width
         auto doc_size = document()->size().toSize();
 
