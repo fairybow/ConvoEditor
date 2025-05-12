@@ -48,12 +48,23 @@ namespace Utility
 
     inline QList<QColor> phiColors(int count, const QColor& startColor = Qt::red)
     {
+        // Try cached:
+        static auto last_count = 0;
+        static QColor last_start_color = Qt::red;
+        static QList<QColor> cached{};
+
+        if (count == last_count
+            && startColor == last_start_color
+            && !cached.isEmpty())
+            return cached;
+
+        // Otherwise:
         QList<QColor> result{};
         if (count < 1) return result;
 
         double h = startColor.hsvHueF();
 
-        // Different saturation and value levels for more variety
+        // Different levels for variety
         QList<double> saturations = { 0.9, 0.7, 0.8 };
         QList<double> values = { 0.9, 0.8, 0.95 };
 
@@ -65,16 +76,10 @@ namespace Utility
             double s = saturations[i % saturations.size()];
             double v = values[i % values.size()];
 
-            // Add color
             result << QColor::fromHsvF(h, s, v);
 
-            // Advance hue by golden ratio conjugate
+            // Advance hue by golden ratio conjugate and keep in range [0, 1)
             h += conjugate;
-
-            //if (h >= 1.0)
-                //h -= 1.0;
-
-            // Keep h in the range [0, 1) using fmod
             h = fmod(h, 1.0);
         }
 
