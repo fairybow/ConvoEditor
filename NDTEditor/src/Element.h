@@ -43,6 +43,7 @@ public:
     void setSpeech(const QString& speech) { speechEdit_->setPlainText(speech); }
     bool eot() const { return eotCheck_->isChecked(); }
     void setEot(bool eot) { eotCheck_->setChecked(eot); }
+    QComboBox* roleSelector() const noexcept { return roleSelector_; }
     AutoSizeTextEdit* speechEdit() const noexcept { return speechEdit_; }
     EotCheck* eotCheck() const noexcept { return eotCheck_; }
 
@@ -98,7 +99,7 @@ private:
         //setAttribute(Qt::WA_StyledBackground, true);
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
-        //speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
+        speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
         //speechEdit_->setUndoRedoEnabled(false);
         visualCue_->setAutoFillBackground(true);
 

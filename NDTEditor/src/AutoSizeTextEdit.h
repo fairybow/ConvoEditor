@@ -48,7 +48,10 @@ public:
             &AutoSizeTextEdit::updateHeight_
         );
 
+        /// WELP: we also want to debounce other editors, because we will be
+        /// switching focus when we use the MMB gesture.
         mmbHeldKeyDebouncer_.setSingleShot(true);
+
         connect
         (
             &mmbHeldKeyDebouncer_,
