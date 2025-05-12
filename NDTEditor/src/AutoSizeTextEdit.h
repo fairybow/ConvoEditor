@@ -115,6 +115,12 @@ protected:
         trim();
     }
 
+    virtual void wheelEvent(QWheelEvent* event) override
+    {
+        // Prevent scrolling
+        event->ignore();
+    }
+
     virtual void mousePressEvent(QMouseEvent* event) override
     {
         if (event->button() == Qt::LeftButton)
@@ -144,7 +150,6 @@ protected:
         else if (event->button() == Qt::MiddleButton)
         {
             mmbPressed_ = true;
-            //listenForMmbGestureKey_ = true;
         }
 
         QTextEdit::mousePressEvent(event);
@@ -160,20 +165,10 @@ protected:
         {
             mmbPressed_ = false;
             emit middleClickReleased(mmbGestureKey_);
-
-            //listenForMmbGestureKey_ = false;
-
-            // We don't reset mmbGestureKey_ here, as we still need to block it
-            // until released
+            // We still need to block mmbGestureKey_ till its release
         }
 
         QTextEdit::mouseReleaseEvent(event);
-    }
-
-    virtual void wheelEvent(QWheelEvent* event) override
-    {
-        // Prevent scrolling
-        event->ignore();
     }
 
     virtual void keyPressEvent(QKeyEvent* event) override
@@ -229,8 +224,6 @@ private:
     bool lmbPressed_ = false;
     bool mmbPressed_ = false;
     bool rmbPressed_ = false;
-
-    //bool listenForMmbGestureKey_ = false;
     int mmbGestureKey_ = -1;
 
 private slots:
