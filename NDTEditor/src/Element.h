@@ -173,6 +173,7 @@ private:
         );
     }
 
+    // Use findText, ding dong
     bool roleExists_(const QString& role) const
     {
         for (auto i = 0; i < roleSelector_->count(); ++i)
