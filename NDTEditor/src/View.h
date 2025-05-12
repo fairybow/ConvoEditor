@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+//#include <memory>
 
 #include <QApplication>
 #include <QJsonArray>
@@ -54,14 +54,16 @@ public:
         QList<QString> old_role_choices = roleChoices_;
         elements_.clear(); // move to clear all widgets?
         insertButtons_.clear(); // move to clear all widgets?
-        roleChoices_.clear();
+        roleChoices_.clear(); // Also, can't we just not clear these till after plan isn't null lol?
 
         auto plan = parse_(document);
 
         if (!plan.isNull())
         {
+            currentPath_ = path;
             clearAllWidgets_();
             populate_(plan);
+            emit documentLoaded();
             return true;
         }
 
@@ -70,6 +72,15 @@ public:
         insertButtons_ = old_insert_buttons;
         roleChoices_ = old_role_choices;
         return false;
+    }
+
+    bool save()
+    {
+        if (currentPath_.isEmpty()) return false;
+
+        auto document = compile_();
+        if (document.isNull()) return false;
+        return Io::write(document, currentPath_);
     }
 
     void split()
@@ -134,6 +145,9 @@ public:
         currentEdit_->setFocus();
     }
 
+signals:
+    void documentLoaded();
+
 private:
     static constexpr auto EXPECTED = R"(
 {
@@ -162,6 +176,7 @@ private:
     QList<InsertButton*> insertButtons_{};
     QList<QString> roleChoices_{};
 
+    QString currentPath_{};
     QPointer<AutoSizeTextEdit> currentEdit_{};
 
     //CommandStack* commandStack_ = new CommandStack(this);
@@ -225,6 +240,26 @@ private:
         return plan;
     }
 
+    QJsonDocument compile_()
+    {
+        QJsonObject root{};
+        QJsonArray array{};
+
+        for (auto& element : elements_)
+        {
+            QJsonObject object{};
+
+            object[Keys::ROLE] = element->role();
+            object[Keys::SPEECH] = element->speech();
+            object[Keys::EOT] = element->eot();
+
+            array << object;
+        }
+
+        root[Keys::RESULTS_ARRAY] = array;
+        return QJsonDocument(root);
+    }
+
     // Clears element and insert button container widgets
     void clearAllWidgets_()
     {
@@ -255,6 +290,14 @@ private:
             &Element::roleAddRequested,
             this,
             &View::onElementRoleAddRequested_
+        );
+
+        connect
+        (
+            element->speechEdit(),
+            &AutoSizeTextEdit::leftRockered,
+            this,
+            [&] { split(); }
         );
 
         connect

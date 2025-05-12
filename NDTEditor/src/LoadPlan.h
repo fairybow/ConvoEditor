@@ -27,14 +27,14 @@ public:
 
     void add(const QJsonValue& jsonValue)
     {
-        auto obj = jsonValue.toObject();
-        auto role = obj[Keys::ROLE].toString();
+        auto object = jsonValue.toObject();
+        auto role = object[Keys::ROLE].toString();
 
         Item item
         {
             role,
-            obj[Keys::SPEECH].toString(),
-            obj[Keys::EOT].toBool()
+            object[Keys::SPEECH].toString(),
+            object[Keys::EOT].toBool()
         };
 
         items_ << item;

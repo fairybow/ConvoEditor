@@ -35,4 +35,30 @@ namespace Io
 
         return document;
     }
+
+    inline bool write(const QJsonDocument& jsonDocument, const QString& path)
+    {
+        QFile file(path);
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            qWarning() << "Failed to open file for writing:" << path;
+            return false;
+        }
+
+        QTextStream out(&file);
+        out << jsonDocument.toJson(QJsonDocument::Indented);
+
+        auto success = out.status() == QTextStream::Ok;
+
+        file.close();
+
+        if (!success)
+        {
+            qWarning() << "Failed to write JSON to file:" << path;
+            return false;
+        }
+
+        return true;
+    }
 }

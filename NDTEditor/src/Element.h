@@ -2,11 +2,14 @@
 
 #include <QApplication>
 #include <QCheckBox>
+#include <QColor>
 #include <QComboBox>
 #include <QDebug>
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QInputDialog>
+#include <QList>
+#include <QPalette>
 #include <QString>
 #include <QStringList>
 #include <QToolButton>
@@ -46,6 +49,7 @@ public:
     void setRoleChoices(const QStringList& roles)
     {
         roleSelector_->clear();
+        visualCueColors_ = Utility::phiColors(roles.count());
         roleSelector_->addItems(roles);
     }
 
@@ -73,11 +77,15 @@ protected:
     }
 
 private:
-    QVBoxLayout* mainLayout_ = nullptr;
+    QHBoxLayout* mainLayout_ = nullptr;
+    QVBoxLayout* controlLayout_ = nullptr;
     QHBoxLayout* topLayout_ = nullptr;
+    QHBoxLayout* bottomLayout_ = nullptr;
     QToolButton* editRole_ = new QToolButton(this);
     QToolButton* addRole_ = new QToolButton(this);
     QToolButton* delete_ = new QToolButton(this);
+    QWidget* visualCue_ = new QWidget(this);
+    QList<QColor> visualCueColors_{};
 
     // States
     QComboBox* roleSelector_ = new QComboBox(this);
@@ -92,6 +100,7 @@ private:
         speechEdit_->setAcceptDrops(false);
         speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
         //speechEdit_->setUndoRedoEnabled(false);
+        visualCue_->setAutoFillBackground(true);
 
         editRole_->setText("Edit");
         addRole_->setText("Add");
@@ -105,22 +114,31 @@ private:
         roleSelector_->setFixedHeight(25);
         eotCheck_->setFixedHeight(25);
         delete_->setFixedHeight(25);
+        visualCue_->setFixedWidth(5);
 
         roleSelector_->installEventFilter(this);
         speechEdit_->installEventFilter(this);
 
         // Set up layouts
-        mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this);
+        mainLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>(this);
+        controlLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>();
         topLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
+        bottomLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
 
         topLayout_->addWidget(editRole_, 0);
         topLayout_->addWidget(addRole_, 0);
         topLayout_->addWidget(roleSelector_, 0);
         topLayout_->addWidget(eotCheck_, 0);
-        topLayout_->addWidget(delete_, 0);
 
-        mainLayout_->addLayout(topLayout_, 0);
-        mainLayout_->addWidget(speechEdit_, 1);
+        bottomLayout_->addWidget(speechEdit_, 0);
+        bottomLayout_->addWidget(delete_, 0, Qt::AlignTop);
+
+        controlLayout_->addLayout(topLayout_, 0);
+        controlLayout_->addLayout(bottomLayout_, 1);
+
+        mainLayout_->addWidget(visualCue_, 0);
+        mainLayout_->addSpacing(5);
+        mainLayout_->addLayout(controlLayout_, 0);
 
         connect
         (
@@ -136,6 +154,14 @@ private:
             &QToolButton::clicked,
             this,
             &Element::onAddRoleClicked_
+        );
+
+        connect
+        (
+            roleSelector_,
+            &QComboBox::currentIndexChanged,
+            this,
+            &Element::onRoleSelectorIndexChanged_
         );
 
         connect
@@ -183,5 +209,14 @@ private slots:
         if (role.isEmpty() || roleExists_(role)) return;
 
         emit roleAddRequested(role);
+    }
+
+    void onRoleSelectorIndexChanged_(int index)
+    {
+        if (index < 0) return;
+
+        QPalette palette = visualCue_->palette();
+        palette.setColor(QPalette::Window, visualCueColors_.at(index));
+        visualCue_->setPalette(palette);
     }
 };
