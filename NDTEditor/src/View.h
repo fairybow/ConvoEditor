@@ -538,13 +538,15 @@ private slots:
 
     void onElementSpeechEditMMBReleased_(int key)
     {
+        // This is definitely dumbly coded:
+
         if (key < 0) return;
 
         auto i = -1;
 
         switch (key)
         {
-        default: break; // Leave -1 if not 1-9
+        default: break; // Leave -1 if not 1-9, could handle other keys later for other ops
         case Qt::Key_1: i = 1; break;
         case Qt::Key_2: i = 2; break;
         case Qt::Key_3: i = 3; break;
@@ -559,7 +561,8 @@ private slots:
         i = qBound(1, i, roleChoices_.count());
         auto new_element_index = split();
 
-        if (i > -1 && new_element_index > 0)
+        // Unsure whether to use new_element_index > -1 or new_element_index > 0
+        if (i > -1 && new_element_index > -1)
             insertElement_(new_element_index, { roleChoices_.at(i - 1) });
     }
 };

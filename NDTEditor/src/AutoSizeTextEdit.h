@@ -43,7 +43,7 @@ public:
     void mmbHeldKeyDebounce()
     {
         QMutexLocker locker(&mutex_);
-        mmbHeldKeyDebouncer_.start(300);
+        mmbHeldKeyDebouncer_.start(500);
     }
 
     bool mmbHeldKeyDebouncerIsActive() const
