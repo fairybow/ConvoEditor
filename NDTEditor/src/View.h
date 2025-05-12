@@ -3,6 +3,7 @@
 //#include <memory>
 
 #include <QApplication>
+#include <QComboBox>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -86,9 +87,9 @@ public:
         return Io::write(document, currentPath_);
     }
 
-    void split()
+    int split()
     {
-        if (!currentEdit_) return;
+        if (!currentEdit_) return -1;
 
         // Find the parent Element by traversing up the widget hierarchy
         Element* current_element = nullptr;
@@ -106,11 +107,11 @@ public:
         }
 
         if (!current_element)
-            return;
+            return -1;
 
         // Find the index of this element
         auto index = elements_.indexOf(current_element);
-        if (index < 0) return;
+        if (index < 0) return -1;
 
         // Get the cursor position and text
         auto cursor = currentEdit_->textCursor();
@@ -118,7 +119,7 @@ public:
         auto text = currentEdit_->toPlainText();
 
         // Validate we have text on both sides of cursor
-        if (position <= 0 || position >= text.length()) return;
+        if (position <= 0 || position >= text.length()) return -1;
 
         // Split the text
         auto before = text.left(position);
@@ -127,7 +128,7 @@ public:
         // Trim whitespace to check if we have actual content
         auto before_trimmed = before.trimmed();
         auto after_trimmed = after.trimmed();
-        if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+        if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return -1;
 
         // Set up the new element
         LoadPlan::Item item
@@ -137,15 +138,19 @@ public:
             current_element->eot()
         };
 
-        insertElement_((index + 1), item);
+        auto new_element_index = insertElement_((index + 1), item);
 
         // Update the current element's speech
         current_element->setSpeech(before_trimmed);
 
         // Set cursor to the end of the original element's text
-        cursor.movePosition(QTextCursor::End);
-        currentEdit_->setTextCursor(cursor);
-        currentEdit_->setFocus();
+        //cursor.movePosition(QTextCursor::End);
+        //currentEdit_->setTextCursor(cursor);
+        //currentEdit_->setFocus();
+
+        // Maybe let insertElement_ focus new element's text
+
+        return new_element_index;
     }
 
 signals:
@@ -313,6 +318,14 @@ private:
 
         connect
         (
+            element->speechEdit(),
+            &AutoSizeTextEdit::middleClickReleased,
+            this,
+            &View::onElementSpeechEditMMBReleased_
+        );
+
+        connect
+        (
             element,
             &Element::deleteRequested,
             this,
@@ -399,7 +412,7 @@ private:
         }
     }
 
-    void insertElement_(int position, const LoadPlan::Item item = {})
+    int insertElement_(int position, const LoadPlan::Item item = {})
     {
         auto element = new Element(elementsLayoutContainer_);
         elements_.insert(position, element);
@@ -416,6 +429,17 @@ private:
 
         insertInsertButton_(position + 1);
         updateInsertButtonPositions_(position + 1);
+
+        // Focus new element? May want a bool, if we ever use this in a way that
+        // isn't response to user action
+
+        auto new_speech_edit = element->speechEdit();
+        auto cursor = new_speech_edit->textCursor();
+        cursor.movePosition(QTextCursor::End);
+        new_speech_edit->setTextCursor(cursor);
+        new_speech_edit->setFocus();
+
+        return elements_.indexOf(element);
     }
 
     /*void onElementEotCheckToggled_(EotCheck* eotCheck, bool now)
@@ -510,5 +534,35 @@ private slots:
 
         // Update positions of all subsequent insert buttons
         updateInsertButtonPositions_(index + 1);
+    }
+
+    void onElementSpeechEditMMBReleased_(int key)
+    {
+        // This is definitely dumbly coded:
+
+        if (key < 0) return;
+
+        auto i = -1;
+
+        switch (key)
+        {
+        default: break; // Leave -1 if not 1-9, could handle other keys later for other ops
+        case Qt::Key_1: i = 1; break;
+        case Qt::Key_2: i = 2; break;
+        case Qt::Key_3: i = 3; break;
+        case Qt::Key_4: i = 4; break;
+        case Qt::Key_5: i = 5; break;
+        case Qt::Key_6: i = 6; break;
+        case Qt::Key_7: i = 7; break;
+        case Qt::Key_8: i = 8; break;
+        case Qt::Key_9: i = 9; break;
+        }
+
+        i = qBound(1, i, roleChoices_.count());
+        auto new_element_index = split();
+
+        // Unsure whether to use new_element_index > -1 or new_element_index > 0
+        if (i > -1 && new_element_index > -1)
+            insertElement_(new_element_index, { roleChoices_.at(i - 1) });
     }
 };

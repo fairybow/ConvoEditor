@@ -4,12 +4,81 @@
 #include <QKeyEvent>
 #include <QMargins>
 #include <QMouseEvent>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QObject>
 #include <QResizeEvent>
 #include <QSize>
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QTimer>
 #include <QWheelEvent>
+
+// Nest, rename to Global, and move to cpp when we un-header all this
+class AutoSizeTextEditGlobal : public QObject
+{
+    Q_OBJECT
+
+public:
+    static AutoSizeTextEditGlobal& instance()
+    {
+        // C++ 11 guarantees that this initialization is thread-safe
+        static AutoSizeTextEditGlobal self;
+        return self;
+    }
+
+    int mmbHeldKey() const
+    {
+        QMutexLocker locker(&mutex_);
+        return mmbHeldKey_;
+    }
+
+    void setMmbHeldKey(int mmbHeldKey)
+    {
+        QMutexLocker locker(&mutex_);
+        mmbHeldKey_ = mmbHeldKey;
+    }
+
+    void mmbHeldKeyDebounce()
+    {
+        QMutexLocker locker(&mutex_);
+        mmbHeldKeyDebouncer_.start(500);
+    }
+
+    bool mmbHeldKeyDebouncerIsActive() const
+    {
+        QMutexLocker locker(&mutex_);
+        return mmbHeldKeyDebouncer_.isActive();
+    }
+
+private:
+    mutable QMutex mutex_;
+    QTimer mmbHeldKeyDebouncer_;
+    int mmbHeldKey_ = -1;
+
+    AutoSizeTextEditGlobal()
+        : QObject(nullptr)
+    {
+        mmbHeldKeyDebouncer_.setSingleShot(true);
+
+        connect
+        (
+            &mmbHeldKeyDebouncer_,
+            &QTimer::timeout,
+            this,
+            [&]
+            {
+                QMutexLocker locker(&mutex_);
+                mmbHeldKey_ = -1;
+            }
+        );
+    }
+
+    ~AutoSizeTextEditGlobal() = default;
+    AutoSizeTextEditGlobal(const AutoSizeTextEditGlobal&) = delete;
+    AutoSizeTextEditGlobal& operator=(const AutoSizeTextEditGlobal&) = delete;
+};
 
 // Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
@@ -100,6 +169,7 @@ public:
 signals:
     void leftRockered();
     void rightRockered();
+    void middleClickReleased(int key = -1);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event) override
@@ -112,6 +182,12 @@ protected:
     {
         QTextEdit::focusOutEvent(event);
         trim();
+    }
+
+    virtual void wheelEvent(QWheelEvent* event) override
+    {
+        // Prevent scrolling
+        event->ignore();
     }
 
     virtual void mousePressEvent(QMouseEvent* event) override
@@ -140,6 +216,10 @@ protected:
 
             rmbPressed_ = true;
         }
+        else if (event->button() == Qt::MiddleButton)
+        {
+            mmbPressed_ = true;
+        }
 
         QTextEdit::mousePressEvent(event);
     }
@@ -150,19 +230,47 @@ protected:
             lmbPressed_ = false;
         else if (event->button() == Qt::RightButton)
             rmbPressed_ = false;
+        else if (event->button() == Qt::MiddleButton)
+        {
+            mmbPressed_ = false;
+
+            auto& global = AutoSizeTextEditGlobal::instance();
+            auto held_key = global.mmbHeldKey();
+            emit middleClickReleased(held_key);
+
+            // When a key is held, it will auto-repeat. So, the press & release
+            // events will continuously fire one after the other. We can't rely
+            // on keyReleaseEvent for our exit condition, and we still need to
+            // block mmbHeldKey_ till its release. Blocking this prevents the
+            // awkward "I accidentally typed my gesture key because I released
+            // MMB a little early" issue
+            if (held_key > -1)
+                global.mmbHeldKeyDebounce(); // maybeDebounce()? Pack more of the conditionals into Global?
+        }
 
         QTextEdit::mouseReleaseEvent(event);
     }
 
-    virtual void wheelEvent(QWheelEvent* event) override
-    {
-        // Prevent scrolling
-        event->ignore();
-    }
-
     virtual void keyPressEvent(QKeyEvent* event) override
     {
-        switch (event->key())
+        auto key = event->key();
+        auto& global = AutoSizeTextEditGlobal::instance();
+
+        if (mmbPressed_)
+        {
+            global.setMmbHeldKey(key);
+            event->ignore();
+            return;
+        }
+
+        if (key == global.mmbHeldKey() && global.mmbHeldKeyDebouncerIsActive())
+        {
+            global.mmbHeldKeyDebounce();
+            event->ignore();
+            return;
+        }
+
+        switch (key)
         {
             // Prevent scrolling
         case Qt::Key_PageUp:
@@ -175,13 +283,22 @@ protected:
         }
     }
 
+    //virtual void keyReleaseEvent(QKeyEvent* event) override
+    //{
+    //    QTextEdit::keyReleaseEvent(event);
+    //}
+
 private:
     bool lmbPressed_ = false;
+    bool mmbPressed_ = false;
     bool rmbPressed_ = false;
 
 private slots:
     void updateHeight_()
     {
+        // There's some extra space below the text. However, for now, it seems
+        // preventing scrolling makes this not an issue
+
         // Get the document's size for the current width
         auto doc_size = document()->size().toSize();
 

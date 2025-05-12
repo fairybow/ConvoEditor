@@ -124,7 +124,7 @@ public:
 
         /// For testing
         auto path = QDir(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).filePath("test.json");
-        QTimer::singleShot(2000, this, [=] { view_->load(path); });
+        QTimer::singleShot(1000, this, [=] { view_->load(path); });
     }
 
 protected:
