@@ -12,6 +12,11 @@
 //#include "CommandStack.h"
 #include "View.h"
 
+/// For testing:
+#include <QTimer>
+#include <QStandardPaths>
+#include <QDir>
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -20,6 +25,7 @@ public:
     explicit MainWindow(QWidget* parent = nullptr)
         : QMainWindow(parent)
     {
+        setGeometry(100, 100, 400, 400);
         setAcceptDrops(true);
         setCentralWidget(view_);
 
@@ -115,6 +121,10 @@ public:
             redo_,
             &QToolButton::setEnabled
         );*/
+
+        /// For testing
+        auto path = QDir(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).filePath("test.json");
+        QTimer::singleShot(2000, this, [=] { view_->load(path); });
     }
 
 protected:

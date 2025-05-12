@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QFocusEvent>
+#include <QKeyEvent>
 #include <QMargins>
 #include <QMouseEvent>
 #include <QResizeEvent>
@@ -8,8 +9,8 @@
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QWheelEvent>
 
-// Turn off scrolling
 // Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
 {
@@ -151,6 +152,27 @@ protected:
             rmbPressed_ = false;
 
         QTextEdit::mouseReleaseEvent(event);
+    }
+
+    virtual void wheelEvent(QWheelEvent* event) override
+    {
+        // Prevent scrolling
+        event->ignore();
+    }
+
+    virtual void keyPressEvent(QKeyEvent* event) override
+    {
+        switch (event->key())
+        {
+            // Prevent scrolling
+        case Qt::Key_PageUp:
+        case Qt::Key_PageDown:
+            event->ignore();
+            return;
+
+        default:
+            QTextEdit::keyPressEvent(event);
+        }
     }
 
 private:
