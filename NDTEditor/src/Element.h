@@ -98,7 +98,7 @@ private:
         //setAttribute(Qt::WA_StyledBackground, true);
         roleSelector_->setEditable(false);
         speechEdit_->setAcceptDrops(false);
-        speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
+        //speechEdit_->setContextMenuPolicy(Qt::ContextMenuPolicy::NoContextMenu);
         //speechEdit_->setUndoRedoEnabled(false);
         visualCue_->setAutoFillBackground(true);
 

@@ -100,6 +100,7 @@ public:
 signals:
     void leftRockered();
     void rightRockered();
+    void middleClickReleased(int key = -1);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event) override
@@ -140,6 +141,11 @@ protected:
 
             rmbPressed_ = true;
         }
+        else if (event->button() == Qt::MiddleButton)
+        {
+            mmbPressed_ = true;
+            //listenForMmbGestureKey_ = true;
+        }
 
         QTextEdit::mousePressEvent(event);
     }
@@ -150,6 +156,16 @@ protected:
             lmbPressed_ = false;
         else if (event->button() == Qt::RightButton)
             rmbPressed_ = false;
+        else if (event->button() == Qt::MiddleButton)
+        {
+            mmbPressed_ = false;
+            emit middleClickReleased(mmbGestureKey_);
+
+            //listenForMmbGestureKey_ = false;
+
+            // We don't reset mmbGestureKey_ here, as we still need to block it
+            // until released
+        }
 
         QTextEdit::mouseReleaseEvent(event);
     }
@@ -162,7 +178,25 @@ protected:
 
     virtual void keyPressEvent(QKeyEvent* event) override
     {
-        switch (event->key())
+        auto key = event->key();
+
+        // Let's not print the key when holding the button!
+        // BUT, we also need to stop printing if we're still holding the key after releasing middle mouse
+        if (mmbPressed_)
+        {
+            mmbGestureKey_ = key;
+            event->ignore();
+            return;
+        }
+
+        // Check if we have any blocked keys (held for a gesture)
+        if (mmbGestureKey_ == key)
+        {
+            event->ignore();
+            return;
+        }
+
+        switch (key)
         {
             // Prevent scrolling
         case Qt::Key_PageUp:
@@ -175,9 +209,29 @@ protected:
         }
     }
 
+    virtual void keyReleaseEvent(QKeyEvent* event) override
+    {
+        auto key = event->key();
+
+        // Remove tracked gesture key and allow following key presses to work as
+        // normal
+        if (mmbGestureKey_ == key && !mmbPressed_)
+        {
+            mmbGestureKey_ = -1;
+            event->ignore();
+            return;
+        }
+
+        QTextEdit::keyReleaseEvent(event);
+    }
+
 private:
     bool lmbPressed_ = false;
+    bool mmbPressed_ = false;
     bool rmbPressed_ = false;
+
+    //bool listenForMmbGestureKey_ = false;
+    int mmbGestureKey_ = -1;
 
 private slots:
     void updateHeight_()

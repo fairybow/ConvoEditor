@@ -313,6 +313,14 @@ private:
 
         connect
         (
+            element->speechEdit(),
+            &AutoSizeTextEdit::middleClickReleased,
+            this,
+            [&](int key) { qDebug() << key; }
+        );
+
+        connect
+        (
             element,
             &Element::deleteRequested,
             this,
