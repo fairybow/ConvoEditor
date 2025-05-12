@@ -185,7 +185,7 @@ protected:
         }
 
         // Check if we have any blocked keys (held for a gesture)
-        if (mmbGestureKey_ == key)
+        if (mmbGestureKey_ > -1)
         {
             event->ignore();
             return;
