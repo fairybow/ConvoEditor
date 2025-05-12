@@ -544,6 +544,9 @@ private slots:
 
         if (key < 0) return;
 
+        // Leave this function open to handle other keys, but pass to an
+        // interrupt_ function that takes a role index arg for keys 1 through 9
+
         auto i = -1;
 
         switch (key)
