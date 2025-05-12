@@ -123,6 +123,8 @@ protected:
 
     virtual void mousePressEvent(QMouseEvent* event) override
     {
+        qDebug() << __FUNCTION__;
+
         if (event->button() == Qt::LeftButton)
         {
             if (rmbPressed_)
@@ -157,6 +159,8 @@ protected:
 
     virtual void mouseReleaseEvent(QMouseEvent* event) override
     {
+        qDebug() << __FUNCTION__;
+
         if (event->button() == Qt::LeftButton)
             lmbPressed_ = false;
         else if (event->button() == Qt::RightButton)
@@ -173,6 +177,8 @@ protected:
 
     virtual void keyPressEvent(QKeyEvent* event) override
     {
+        qDebug() << __FUNCTION__;
+
         auto key = event->key();
 
         // Let's not print the key when holding the button!
@@ -204,13 +210,20 @@ protected:
         }
     }
 
+    /// The core bug here is that a key held will be continuously sending
+    /// keyPressEvent, keyReleaseEvent. So, a held key is continuously
+    /// "released" as well. This will trigger our exit condition for the held
+    /// gesture key without us having ever let go of it. Thus, our code doesn't
+    /// work for preventing the held gesture key from being printed in the text
+    /// field over and over after releasing MMB.
+
     virtual void keyReleaseEvent(QKeyEvent* event) override
     {
+        qDebug() << __FUNCTION__;
+
         auto key = event->key();
 
-        // Remove tracked gesture key and allow following key presses to work as
-        // normal
-        if (mmbGestureKey_ == key && !mmbPressed_)
+        if (mmbGestureKey_ > -1 && !mmbPressed_)
         {
             mmbGestureKey_ = -1;
             event->ignore();
