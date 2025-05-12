@@ -62,7 +62,7 @@ public:
             autoEot_,
             &QToolButton::clicked,
             this,
-            [&] {}
+            [&] { view_->autoEot(); }
         );
 
         connect

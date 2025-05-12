@@ -3,6 +3,7 @@
 //#include <memory>
 
 #include <QApplication>
+#include <QChar>
 #include <QComboBox>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -14,6 +15,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QString>
+#include <QStringList>
 #include <QTextCursor>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -153,6 +155,26 @@ public:
         // Maybe let insertElement_ focus new element's text
 
         return new_element_index;
+    }
+
+    void autoEot()
+    {
+        if (currentEdit_)
+            currentEdit_->trim();
+
+        for (auto& element : elements_)
+        {
+            auto speech = element->speech().trimmed();
+            if (speech.isEmpty()) continue;
+
+            if (speech.endsWith('.') || speech.endsWith('!') || speech.endsWith('?'))
+            {
+                element->setEot(true);
+                continue;
+            }
+
+            element->setEot(false);
+        }
     }
 
 signals:
