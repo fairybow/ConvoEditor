@@ -75,6 +75,7 @@ protected:
 private:
     QVBoxLayout* mainLayout_ = nullptr;
     QHBoxLayout* topLayout_ = nullptr;
+    QHBoxLayout* bottomLayout_ = nullptr;
     QToolButton* editRole_ = new QToolButton(this);
     QToolButton* addRole_ = new QToolButton(this);
     QToolButton* delete_ = new QToolButton(this);
@@ -112,15 +113,18 @@ private:
         // Set up layouts
         mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this);
         topLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
+        bottomLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
 
         topLayout_->addWidget(editRole_, 0);
         topLayout_->addWidget(addRole_, 0);
         topLayout_->addWidget(roleSelector_, 0);
         topLayout_->addWidget(eotCheck_, 0);
-        topLayout_->addWidget(delete_, 0);
+
+        bottomLayout_->addWidget(speechEdit_, 0);
+        bottomLayout_->addWidget(delete_, 0, Qt::AlignTop);
 
         mainLayout_->addLayout(topLayout_, 0);
-        mainLayout_->addWidget(speechEdit_, 1);
+        mainLayout_->addLayout(bottomLayout_, 1);
 
         connect
         (

@@ -295,6 +295,14 @@ private:
         connect
         (
             element->speechEdit(),
+            &AutoSizeTextEdit::leftRockered,
+            this,
+            [&] { split(); }
+        );
+
+        connect
+        (
+            element->speechEdit(),
             &AutoSizeTextEdit::rightRockered,
             this,
             [&] { split(); }
