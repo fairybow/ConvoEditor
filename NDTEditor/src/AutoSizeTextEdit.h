@@ -151,6 +151,10 @@ protected:
         }
         else if (event->button() == Qt::MiddleButton)
         {
+            // Allow MMB to set cursor
+            auto cursor = cursorForPosition(event->pos());
+            setTextCursor(cursor);
+
             mmbPressed_ = true;
             emit middlePressed();
         }
