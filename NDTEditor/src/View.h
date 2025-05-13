@@ -141,14 +141,14 @@ public:
 
             // Split the text
             before_text = text.left(position).trimmed();
-            auto after = text.mid(position).trimmed();
-            if (before_text.isEmpty() || after.isEmpty()) return;
+            auto after_text = text.mid(position).trimmed();
+            if (before_text.isEmpty() || after_text.isEmpty()) return;
 
             // Set up the new element
             LoadPlan::Item item
             {
                 initial_element->role(),
-                after,
+                after_text,
                 initial_element->eot()
             };
 
@@ -156,12 +156,22 @@ public:
         }
         else // has_selection || forceTripart
         {
-            constexpr auto get_role =
+            constexpr auto get_tripart_role =
                 [](int role, const QStringList& roles, const QString& fallback) noexcept
                 {
                     return (role > -1)
                         ? roles.at(role)
                         : fallback;
+                };
+
+            constexpr auto tripart_insert =
+                [](View* v, int insertIndex, const LoadPlan::Item& middle, const LoadPlan::Item& after) noexcept
+                {
+                    // Insert the elements: after first, then middle (which puts
+                    // middle between initial and after)
+                    v->insertElement_(insertIndex, after);
+                    auto middle_index = v->insertElement_(insertIndex, middle);
+                    return middle_index;
                 };
 
             if (!has_selection)
@@ -173,30 +183,32 @@ public:
 
                 // Split the text
                 before_text = text.left(position).trimmed();
-                auto after = text.mid(position).trimmed();
-                if (before_text.isEmpty() || after.isEmpty()) return;
+                auto after_text = text.mid(position).trimmed();
+                if (before_text.isEmpty() || after_text.isEmpty()) return;
 
                 auto initial_role = initial_element->role();
 
                 // Set up the new elements
                 LoadPlan::Item middle_item
                 {
-                    get_role(tripartRole, roleChoices_, initial_role),
+                    get_tripart_role(tripartRole, roleChoices_, initial_role),
                     {}, false
                 };
 
                 LoadPlan::Item after_item
                 {
                     initial_role,
-                    after,
+                    after_text,
                     initial_element->eot()
                 };
 
-                // Insert the elements: after first, then middle (which puts
-                // middle between initial and after)
-                auto insert_index = index + 1;
-                insertElement_(insert_index, after_item);
-                insertElement_(insert_index, middle_item);
+                tripart_insert
+                (
+                    this,
+                    index + 1,
+                    middle_item,
+                    after_item
+                );
             }
             else // has_selection
             {
@@ -210,17 +222,17 @@ public:
 
                 // Split the text
                 before_text = text.left(selection_start).trimmed();
-                auto middle = cursor.selection().toPlainText().trimmed();
-                auto after = text.mid(selection_end).trimmed();
-                if (before_text.isEmpty() || middle.isEmpty() || after.isEmpty()) return;
+                auto middle_text = cursor.selection().toPlainText().trimmed();
+                auto after_text = text.mid(selection_end).trimmed();
+                if (before_text.isEmpty() || middle_text.isEmpty() || after_text.isEmpty()) return;
 
                 auto initial_role = initial_element->role();
 
                 // Create middle element with selection text
                 LoadPlan::Item middle_item
                 {
-                    get_role(tripartRole, roleChoices_, initial_role),
-                    middle,
+                    get_tripart_role(tripartRole, roleChoices_, initial_role),
+                    middle_text,
                     false
                 };
 
@@ -228,15 +240,18 @@ public:
                 LoadPlan::Item after_item
                 {
                     initial_role,
-                    after,
+                    after_text,
                     initial_element->eot()
                 };
 
-                // Insert the elements: after first, then middle (which puts
-                // middle between initial and after)
-                auto insert_index = index + 1;
-                insertElement_(insert_index, after_item);
-                auto middle_index = insertElement_(insert_index, middle_item);
+                auto middle_index = tripart_insert
+                (
+                    this, 
+                    index + 1,
+                    middle_item,
+                    after_item
+                );
+
                 eotAdjust_(elements_.at(middle_index));
             }
 
