@@ -155,7 +155,7 @@ public:
                 initial_element->eot()
             };
 
-            auto new_element_index = insertElement_((index + 1), item);
+            insertElement_((index + 1), item);
 
             // Update the intial element's speech
             initial_element->setSpeech(before_trimmed);
