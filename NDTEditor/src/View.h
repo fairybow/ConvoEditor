@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <memory>
-
 #include <QApplication>
 #include <QChar>
 #include <QComboBox>
@@ -92,34 +90,34 @@ public:
         return Io::write(document, currentPath_);
     }
 
-    // Splits text elements at cursor position in three ways:
-    // 1. Bipart (2-way): No selection -> splits at cursor into before/after
-    // 2. Empty Tripart: No selection but forceTripart-> adds empty middle
-    //    element
-    // 3. Selection Tripart: With selection -> places selected text in middle
-    // 
-    // Triggered by: right rocker or MMB click. Making a mouse chord (MMB + n)
-    // will force tripart regardless of selection and assign n role to the
-    // middle element (useful for quickly splitting as an interruption)
-    // 
-    // Automatically adjusts EOT based on punctuation.
     void split(bool forceTripart = false, int tripartRole = -1)
     {
+        // Splits text elements at cursor position in three ways:
+        // 1. Bipart (2-way): No selection -> splits at cursor into before/after
+        // 2. Empty Tripart: No selection but forceTripart-> adds empty middle
+        //    element
+        // 3. Selection Tripart: With selection -> places selected text in
+        //    middle
+        // 
+        // Triggered by: right rocker or MMB click. Making a mouse chord (MMB +
+        // n) will force tripart regardless of selection and assign n role to
+        // the middle element (useful for quickly splitting as an interruption)
+        // 
+        // Automatically adjusts EOT based on punctuation.
         if (!currentEdit_) return;
 
         // Find the parent Element by traversing up the widget hierarchy
         Element* initial_element = nullptr;
-        auto widget = currentEdit_->parentWidget();
 
-        while (widget)
+        for (auto widget = currentEdit_->parentWidget();
+            widget;
+            widget = widget->parentWidget())
         {
             if (auto next = qobject_cast<Element*>(widget))
             {
                 initial_element = next;
                 break;
             }
-
-            widget = widget->parentWidget();
         }
 
         if (!initial_element) return;
@@ -132,6 +130,8 @@ public:
         auto has_selection = cursor.hasSelection();
         auto text = currentEdit_->toPlainText();
 
+        QString before_text{};
+
         if (!has_selection && !forceTripart)
         {
             // 1. Break into 2
@@ -140,34 +140,27 @@ public:
             if (position <= 0 || position >= text.length()) return;
 
             // Split the text
-            auto before = text.left(position);
-            auto after = text.mid(position);
-
-            // Trim whitespace to check if we have actual content
-            auto before_trimmed = before.trimmed();
-            auto after_trimmed = after.trimmed();
-            if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+            before_text = text.left(position).trimmed();
+            auto after = text.mid(position).trimmed();
+            if (before_text.isEmpty() || after.isEmpty()) return;
 
             // Set up the new element
             LoadPlan::Item item
             {
                 initial_element->role(),
-                after_trimmed,
+                after,
                 initial_element->eot()
             };
 
             insertElement_((index + 1), item);
-
-            // Update the intial element's speech
-            initial_element->setSpeech(before_trimmed);
-            eotAdjust_(initial_element);
         }
         else // has_selection || forceTripart
         {
-            auto get_role = [&](const QString& fallback)
+            constexpr auto get_role =
+                [](int role, const QStringList& roles, const QString& fallback) noexcept
                 {
-                    return (tripartRole > -1)
-                        ? roleChoices_.at(tripartRole)
+                    return (role > -1)
+                        ? roles.at(role)
                         : fallback;
                 };
 
@@ -179,40 +172,31 @@ public:
                 if (position <= 0 || position >= text.length()) return;
 
                 // Split the text
-                auto before = text.left(position);
-                auto after = text.mid(position);
-
-                // Trim whitespace to check if we have actual content
-                auto before_trimmed = before.trimmed();
-                auto after_trimmed = after.trimmed();
-                if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+                before_text = text.left(position).trimmed();
+                auto after = text.mid(position).trimmed();
+                if (before_text.isEmpty() || after.isEmpty()) return;
 
                 auto initial_role = initial_element->role();
-                auto initial_eot = initial_element->eot();
 
                 // Set up the new elements
                 LoadPlan::Item middle_item
                 {
-                    get_role(initial_role),
-                    {},
-                    false
+                    get_role(tripartRole, roleChoices_, initial_role),
+                    {}, false
                 };
 
                 LoadPlan::Item after_item
                 {
                     initial_role,
-                    after_trimmed,
-                    initial_eot
+                    after,
+                    initial_element->eot()
                 };
 
-                // Insert the elements - after first, then middle (which puts
+                // Insert the elements: after first, then middle (which puts
                 // middle between initial and after)
-                insertElement_((index + 1), after_item);
-                insertElement_((index + 1), middle_item);
-
-                // Update the intial element's speech
-                initial_element->setSpeech(before_trimmed);
-                eotAdjust_(initial_element);
+                auto insert_index = index + 1;
+                insertElement_(insert_index, after_item);
+                insertElement_(insert_index, middle_item);
             }
             else // has_selection
             {
@@ -225,26 +209,18 @@ public:
                 if (selection_start <= 0 || selection_end >= text.length()) return;
 
                 // Split the text
-                auto before = text.left(selection_start);
-                auto middle = cursor.selection().toPlainText();
-                auto after = text.mid(selection_end);
-
-                // Trim whitespace to check if we have actual content
-                auto before_trimmed = before.trimmed();
-                auto middle_trimmed = middle.trimmed();
-                auto after_trimmed = after.trimmed();
-
-                // Check that we don't have only whitespace in any part
-                if (before_trimmed.isEmpty() || middle_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+                before_text = text.left(selection_start).trimmed();
+                auto middle = cursor.selection().toPlainText().trimmed();
+                auto after = text.mid(selection_end).trimmed();
+                if (before_text.isEmpty() || middle.isEmpty() || after.isEmpty()) return;
 
                 auto initial_role = initial_element->role();
-                auto initial_eot = initial_element->eot();
 
                 // Create middle element with selection text
                 LoadPlan::Item middle_item
                 {
-                    get_role(initial_role),
-                    middle_trimmed,
+                    get_role(tripartRole, roleChoices_, initial_role),
+                    middle,
                     false
                 };
 
@@ -252,19 +228,20 @@ public:
                 LoadPlan::Item after_item
                 {
                     initial_role,
-                    after_trimmed,
-                    initial_eot
+                    after,
+                    initial_element->eot()
                 };
 
-                // Insert the elements - after first, then middle (which puts middle between initial and after)
-                insertElement_((index + 1), after_item);
-                auto middle_index = insertElement_((index + 1), middle_item);
-
-                // Update the initial element's speech
-                initial_element->setSpeech(before_trimmed);
-                eotAdjust_(initial_element);
+                // Insert the elements: after first, then middle (which puts
+                // middle between initial and after)
+                auto insert_index = index + 1;
+                insertElement_(insert_index, after_item);
+                auto middle_index = insertElement_(insert_index, middle_item);
                 eotAdjust_(elements_.at(middle_index));
             }
+
+            initial_element->setSpeech(before_text);
+            eotAdjust_(initial_element);
         }
     }
 
