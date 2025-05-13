@@ -91,74 +91,10 @@ public:
         return Io::write(document, currentPath_);
     }
 
-    int oldSplit()
+    void split(bool forceTripart = false)
     {
-        if (!currentEdit_) return -1;
+        // Prabably should no longer return an index, given that for tripart it isn't clear which we would return
 
-        // Find the parent Element by traversing up the widget hierarchy
-        Element* current_element = nullptr;
-        auto widget = currentEdit_->parentWidget();
-
-        while (widget)
-        {
-            if (auto next = qobject_cast<Element*>(widget))
-            {
-                current_element = next;
-                break;
-            }
-
-            widget = widget->parentWidget();
-        }
-
-        if (!current_element)
-            return -1;
-
-        // Find the index of this element
-        auto index = elements_.indexOf(current_element);
-        if (index < 0) return -1;
-
-        // Get the cursor position and text
-        auto cursor = currentEdit_->textCursor();
-        auto position = cursor.position();
-        auto text = currentEdit_->toPlainText();
-
-        // Validate we have text on both sides of cursor
-        if (position <= 0 || position >= text.length()) return -1;
-
-        // Split the text
-        auto before = text.left(position);
-        auto after = text.mid(position);
-
-        // Trim whitespace to check if we have actual content
-        auto before_trimmed = before.trimmed();
-        auto after_trimmed = after.trimmed();
-        if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return -1;
-
-        // Set up the new element
-        LoadPlan::Item item
-        {
-            current_element->role(),
-            after_trimmed,
-            current_element->eot()
-        };
-
-        auto new_element_index = insertElement_((index + 1), item);
-
-        // Update the current element's speech
-        current_element->setSpeech(before_trimmed);
-
-        // Set cursor to the end of the original element's text
-        //cursor.movePosition(QTextCursor::End);
-        //currentEdit_->setTextCursor(cursor);
-        //currentEdit_->setFocus();
-
-        // Maybe let insertElement_ focus new element's text
-
-        return new_element_index;
-    }
-
-    int split()
-    {
         // State will depend on mouse chords. No chords will just copy state (the new element(s) will have same states). This function won't handle chords/keys, but will need parameters to mark "interruption" vs just splitting (the latter implying the 1st element should be marked EOT false). Other chords will set role for the new element (either 2nd or middle)
 
         // For example, splitting with highlight by using MMB would split into 3 elements that all share state (role, speech, eot). Splitting same highlighted with MMB+2 would split into 3 elements where 1st's role is same, 2nd's role is role 2 (our key), and 3rd's role is same as 1st. And doing something like MMB+Alt+2 would be an interruption, where we do the same as before (with new 2 role in middle) but also mark the 1st element as EOT false (this speaker role was interrupted).
@@ -169,8 +105,65 @@ public:
 
         // If there's no highlight, we can still provide a force parameter to make 3 elements instead of 2.
 
+        if (!currentEdit_) return;
 
+        // Find the parent Element by traversing up the widget hierarchy
+        Element* initial_element = nullptr;
+        auto widget = currentEdit_->parentWidget();
 
+        while (widget)
+        {
+            if (auto next = qobject_cast<Element*>(widget))
+            {
+                initial_element = next;
+                break;
+            }
+
+            widget = widget->parentWidget();
+        }
+
+        if (!initial_element) return;
+
+        auto index = elements_.indexOf(initial_element);
+        if (index < 0) return;
+
+        auto cursor = currentEdit_->textCursor();
+
+        if (!cursor.hasSelection() && !forceTripart)
+        {
+            // Get the cursor position and text
+            auto position = cursor.position();
+            auto text = currentEdit_->toPlainText();
+
+            // Validate we have text on both sides of cursor
+            if (position <= 0 || position >= text.length()) return;
+
+            // Split the text
+            auto before = text.left(position);
+            auto after = text.mid(position);
+
+            // Trim whitespace to check if we have actual content
+            auto before_trimmed = before.trimmed();
+            auto after_trimmed = after.trimmed();
+            if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+
+            // Set up the new element
+            LoadPlan::Item item
+            {
+                initial_element->role(),
+                after_trimmed,
+                initial_element->eot()
+            };
+
+            auto new_element_index = insertElement_((index + 1), item);
+
+            // Update the intial element's speech
+            initial_element->setSpeech(before_trimmed);
+        }
+        else // cursor.hasSelection() || forceTripart
+        {
+            // check selection isn't beginning or end
+        }
     }
 
     void autoEot()
@@ -572,7 +565,7 @@ private slots:
     {
         // This is definitely dumbly coded:
 
-        if (key < 0) return;
+        /*if (key < 0) return;
 
         // Leave this function open to handle other keys, but pass to an
         // interrupt_ function that takes a role index arg for keys 1 through 9
@@ -601,6 +594,6 @@ private slots:
         {
             auto interruption_index = insertElement_(new_element_index, { roleChoices_.at(i - 1) });
             elements_.at(static_cast<qsizetype>(interruption_index - 1))->setEot(false);
-        }
+        }*/
     }
 };
