@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <memory>
-
 #include <QApplication>
 #include <QChar>
 #include <QComboBox>
@@ -17,6 +15,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTextCursor>
+#include <QTextDocumentFragment>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -91,70 +90,174 @@ public:
         return Io::write(document, currentPath_);
     }
 
-    int split()
+    void split(bool forceTripart = false, int tripartRole = -1)
     {
-        if (!currentEdit_) return -1;
+        // Splits text elements at cursor position in three ways:
+        // 1. Bipart (2-way): No selection -> splits at cursor into before/after
+        // 2. Empty Tripart: No selection but forceTripart-> adds empty middle
+        //    element
+        // 3. Selection Tripart: With selection -> places selected text in
+        //    middle
+        // 
+        // Triggered by: right rocker or MMB click. Making a mouse chord (MMB +
+        // n) will force tripart regardless of selection and assign n role to
+        // the middle element (useful for quickly splitting as an interruption)
+        // 
+        // Automatically adjusts EOT based on punctuation.
+        if (!currentEdit_) return;
 
         // Find the parent Element by traversing up the widget hierarchy
-        Element* current_element = nullptr;
-        auto widget = currentEdit_->parentWidget();
+        Element* initial_element = nullptr;
 
-        while (widget)
+        for (auto widget = currentEdit_->parentWidget();
+            widget;
+            widget = widget->parentWidget())
         {
             if (auto next = qobject_cast<Element*>(widget))
             {
-                current_element = next;
+                initial_element = next;
                 break;
             }
-
-            widget = widget->parentWidget();
         }
 
-        if (!current_element)
-            return -1;
+        if (!initial_element) return;
 
-        // Find the index of this element
-        auto index = elements_.indexOf(current_element);
-        if (index < 0) return -1;
+        auto index = elements_.indexOf(initial_element);
+        if (index < 0) return;
 
-        // Get the cursor position and text
         auto cursor = currentEdit_->textCursor();
         auto position = cursor.position();
+        auto has_selection = cursor.hasSelection();
         auto text = currentEdit_->toPlainText();
 
-        // Validate we have text on both sides of cursor
-        if (position <= 0 || position >= text.length()) return -1;
+        QString before_text{};
 
-        // Split the text
-        auto before = text.left(position);
-        auto after = text.mid(position);
-
-        // Trim whitespace to check if we have actual content
-        auto before_trimmed = before.trimmed();
-        auto after_trimmed = after.trimmed();
-        if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return -1;
-
-        // Set up the new element
-        LoadPlan::Item item
+        if (!has_selection && !forceTripart)
         {
-            current_element->role(),
-            after_trimmed,
-            current_element->eot()
-        };
+            // 1. Break into 2
 
-        auto new_element_index = insertElement_((index + 1), item);
+            // Validate we have text on both sides of cursor
+            if (position <= 0 || position >= text.length()) return;
 
-        // Update the current element's speech
-        current_element->setSpeech(before_trimmed);
+            // Split the text
+            before_text = text.left(position).trimmed();
+            auto after_text = text.mid(position).trimmed();
+            if (before_text.isEmpty() || after_text.isEmpty()) return;
 
-        // Set cursor to the end of the original element's text
-        //cursor.movePosition(QTextCursor::End);
-        //currentEdit_->setTextCursor(cursor);
-        //currentEdit_->setFocus();
+            // Set up the new element
+            LoadPlan::Item item
+            {
+                initial_element->role(),
+                after_text,
+                initial_element->eot()
+            };
 
-        // Maybe let insertElement_ focus new element's text
+            insertElement_((index + 1), item);
+        }
+        else // has_selection || forceTripart
+        {
+            constexpr auto get_tripart_role =
+                [](int role, const QStringList& roles, const QString& fallback) noexcept
+                {
+                    return (role > -1)
+                        ? roles.at(role)
+                        : fallback;
+                };
 
-        return new_element_index;
+            constexpr auto tripart_insert =
+                [](View* v, int insertIndex, const LoadPlan::Item& middle, const LoadPlan::Item& after) noexcept
+                {
+                    // Insert the elements: after first, then middle (which puts
+                    // middle between initial and after)
+                    v->insertElement_(insertIndex, after);
+                    auto middle_index = v->insertElement_(insertIndex, middle);
+                    return middle_index;
+                };
+
+            if (!has_selection)
+            {
+                // 2. Break into 3 (with empty middle element)
+
+                // Validate we have text on both sides of cursor
+                if (position <= 0 || position >= text.length()) return;
+
+                // Split the text
+                before_text = text.left(position).trimmed();
+                auto after_text = text.mid(position).trimmed();
+                if (before_text.isEmpty() || after_text.isEmpty()) return;
+
+                auto initial_role = initial_element->role();
+
+                // Set up the new elements
+                LoadPlan::Item middle_item
+                {
+                    get_tripart_role(tripartRole, roleChoices_, initial_role),
+                    {}, false
+                };
+
+                LoadPlan::Item after_item
+                {
+                    initial_role,
+                    after_text,
+                    initial_element->eot()
+                };
+
+                tripart_insert
+                (
+                    this,
+                    index + 1,
+                    middle_item,
+                    after_item
+                );
+            }
+            else // has_selection
+            {
+                // 3. Break into 3 with selection in the middle element
+
+                auto selection_start = cursor.selectionStart();
+                auto selection_end = cursor.selectionEnd();
+
+                // Validate we have text on both sides of the selection
+                if (selection_start <= 0 || selection_end >= text.length()) return;
+
+                // Split the text
+                before_text = text.left(selection_start).trimmed();
+                auto middle_text = cursor.selection().toPlainText().trimmed();
+                auto after_text = text.mid(selection_end).trimmed();
+                if (before_text.isEmpty() || middle_text.isEmpty() || after_text.isEmpty()) return;
+
+                auto initial_role = initial_element->role();
+
+                // Create middle element with selection text
+                LoadPlan::Item middle_item
+                {
+                    get_tripart_role(tripartRole, roleChoices_, initial_role),
+                    middle_text,
+                    false
+                };
+
+                // Create after element
+                LoadPlan::Item after_item
+                {
+                    initial_role,
+                    after_text,
+                    initial_element->eot()
+                };
+
+                auto middle_index = tripart_insert
+                (
+                    this, 
+                    index + 1,
+                    middle_item,
+                    after_item
+                );
+
+                eotAdjust_(elements_.at(middle_index));
+            }
+
+            initial_element->setSpeech(before_text);
+            eotAdjust_(initial_element);
+        }
     }
 
     void autoEot()
@@ -163,18 +266,7 @@ public:
             currentEdit_->trim();
 
         for (auto& element : elements_)
-        {
-            auto speech = element->speech().trimmed();
-            if (speech.isEmpty()) continue;
-
-            if (speech.endsWith('.') || speech.endsWith('!') || speech.endsWith('?'))
-            {
-                element->setEot(true);
-                continue;
-            }
-
-            element->setEot(false);
-        }
+            eotAdjust_(element);
     }
 
 signals:
@@ -211,6 +303,9 @@ private:
     QString currentPath_{};
     QPointer<AutoSizeTextEdit> currentEdit_{};
 
+    // Click is a press & release
+    bool ignoreNextElementSpeechEditMiddleClick_ = false;
+
     //CommandStack* commandStack_ = new CommandStack(this);
 
     void initialize_()
@@ -241,6 +336,24 @@ private:
             this,
             &View::onQAppFocusChanged_
         );
+    }
+
+    void eotAdjust_(Element* element)
+    {
+        if (!element) return;
+
+        auto speech = element->speech().trimmed();
+        if (speech.isEmpty()) return;
+
+        // Set EOT based on whether the speech ends with terminal punctuation
+        constexpr auto set_eot = [](const QString& s)
+            {
+                return s.endsWith('.') ||
+                    s.endsWith('!') ||
+                    s.endsWith('?');
+            };
+
+        element->setEot(set_eot(speech));
     }
 
     LoadPlan parse_(const QJsonDocument& document)
@@ -327,7 +440,7 @@ private:
         connect
         (
             element->speechEdit(),
-            &AutoSizeTextEdit::leftRockered,
+            &AutoSizeTextEdit::rockeredRight,
             this,
             [&] { split(); }
         );
@@ -335,17 +448,23 @@ private:
         connect
         (
             element->speechEdit(),
-            &AutoSizeTextEdit::rightRockered,
+            &AutoSizeTextEdit::middleClicked,
             this,
-            [&] { split(); }
+            [&]
+            {
+                if (ignoreNextElementSpeechEditMiddleClick_)
+                    ignoreNextElementSpeechEditMiddleClick_ = false;
+                else
+                    split();
+            }
         );
 
         connect
         (
             element->speechEdit(),
-            &AutoSizeTextEdit::middleClickReleased,
+            &AutoSizeTextEdit::mouseChorded,
             this,
-            &View::onElementSpeechEditMMBReleased_
+            &View::onElementSpeechEditMouseChorded_
         );
 
         connect
@@ -560,7 +679,7 @@ private slots:
         updateInsertButtonPositions_(index + 1);
     }
 
-    void onElementSpeechEditMMBReleased_(int key)
+    void onElementSpeechEditMouseChorded_(int key)
     {
         // This is definitely dumbly coded:
 
@@ -574,25 +693,21 @@ private slots:
         switch (key)
         {
         default: break; // Leave -1 if not 1-9, could handle other keys later for other ops
-        case Qt::Key_1: i = 1; break;
-        case Qt::Key_2: i = 2; break;
-        case Qt::Key_3: i = 3; break;
-        case Qt::Key_4: i = 4; break;
-        case Qt::Key_5: i = 5; break;
-        case Qt::Key_6: i = 6; break;
-        case Qt::Key_7: i = 7; break;
-        case Qt::Key_8: i = 8; break;
-        case Qt::Key_9: i = 9; break;
+        case Qt::Key_1: i = 0; break;
+        case Qt::Key_2: i = 1; break;
+        case Qt::Key_3: i = 2; break;
+        case Qt::Key_4: i = 3; break;
+        case Qt::Key_5: i = 4; break;
+        case Qt::Key_6: i = 5; break;
+        case Qt::Key_7: i = 6; break;
+        case Qt::Key_8: i = 7; break;
+        case Qt::Key_9: i = 8; break;
         }
 
-        i = qBound(1, i, roleChoices_.count());
-        auto new_element_index = split();
+        if (i == -1) return;
 
-        // Unsure whether to use new_element_index > -1 or new_element_index > 0
-        if (i > -1 && new_element_index > -1)
-        {
-            auto interruption_index = insertElement_(new_element_index, { roleChoices_.at(i - 1) });
-            elements_.at(static_cast<qsizetype>(interruption_index - 1))->setEot(false);
-        }
+        ignoreNextElementSpeechEditMiddleClick_ = true;
+        i = qBound(0, i, (roleChoices_.count() - 1));
+        split(true, i);
     }
 };

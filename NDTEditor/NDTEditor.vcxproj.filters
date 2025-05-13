@@ -78,6 +78,9 @@
     <ClInclude Include="src\CommandStack.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="old\OLDAutoSizeTextEdit.h">
+      <Filter>Old</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\MainWindow.h">
