@@ -17,6 +17,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTextCursor>
+#include <QTextDocumentFragment>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -128,12 +129,11 @@ public:
         if (index < 0) return;
 
         auto cursor = currentEdit_->textCursor();
+        auto text = currentEdit_->toPlainText();
 
         if (!cursor.hasSelection() && !forceTripart)
         {
-            // Get the cursor position and text
             auto position = cursor.position();
-            auto text = currentEdit_->toPlainText();
 
             // Validate we have text on both sides of cursor
             if (position <= 0 || position >= text.length()) return;
@@ -162,7 +162,25 @@ public:
         }
         else // cursor.hasSelection() || forceTripart
         {
-            // check selection isn't beginning or end
+            auto selection_start = cursor.selectionStart();
+            auto selection_end = cursor.selectionEnd();
+
+            // Validate we have text on both sides of the selection
+            if (selection_start <= 0 || selection_end >= text.length()) return;
+
+            // Split the text
+            auto before = text.left(selection_start);
+            auto middle = cursor.selection().toPlainText();
+            auto after = text.mid(selection_end);
+
+            // Check that we don't have only whitespace (may want to double
+            // check the logic here--what kind of highlights will we allow to
+            // cause tripart? A highlighted space in between real content? Etc.
+            // Check logic in bipart section, too.
+
+            // 2 LoadPlan::Items
+
+            //...
         }
     }
 
