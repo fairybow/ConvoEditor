@@ -254,10 +254,10 @@ public:
 
                 eotAdjust_(elements_.at(middle_index));
             }
-
-            initial_element->setSpeech(before_text);
-            eotAdjust_(initial_element);
         }
+
+        initial_element->setSpeech(before_text);
+        eotAdjust_(initial_element);
     }
 
     void autoEot()
