@@ -92,7 +92,7 @@ public:
         return Io::write(document, currentPath_);
     }
 
-    void split(bool forceTripart = false)
+    void split(bool forceTripart = false, int tripartRole = -1)
     {
         // Prabably should no longer return an index, given that for tripart it isn't clear which we would return
 
@@ -129,11 +129,13 @@ public:
         if (index < 0) return;
 
         auto cursor = currentEdit_->textCursor();
+        auto position = cursor.position();
+        auto has_selection = cursor.hasSelection();
         auto text = currentEdit_->toPlainText();
 
-        if (!cursor.hasSelection() && !forceTripart)
+        if (!has_selection && !forceTripart)
         {
-            auto position = cursor.position();
+            // 1. Break into 2
 
             // Validate we have text on both sides of cursor
             if (position <= 0 || position >= text.length()) return;
@@ -160,27 +162,106 @@ public:
             // Update the intial element's speech
             initial_element->setSpeech(before_trimmed);
         }
-        else // cursor.hasSelection() || forceTripart
+        else // has_selection || forceTripart
         {
-            auto selection_start = cursor.selectionStart();
-            auto selection_end = cursor.selectionEnd();
+            auto get_role = [&](const QString& fallback)
+                {
+                    return (tripartRole > -1)
+                        ? roleChoices_.at(tripartRole)
+                        : fallback;
+                };
 
-            // Validate we have text on both sides of the selection
-            if (selection_start <= 0 || selection_end >= text.length()) return;
+            if (!has_selection)
+            {
+                // 2. Break into 3 (with empty middle element)
 
-            // Split the text
-            auto before = text.left(selection_start);
-            auto middle = cursor.selection().toPlainText();
-            auto after = text.mid(selection_end);
+                // Validate we have text on both sides of cursor
+                if (position <= 0 || position >= text.length()) return;
 
-            // Check that we don't have only whitespace (may want to double
-            // check the logic here--what kind of highlights will we allow to
-            // cause tripart? A highlighted space in between real content? Etc.
-            // Check logic in bipart section, too.
+                // Split the text
+                auto before = text.left(position);
+                auto after = text.mid(position);
 
-            // 2 LoadPlan::Items
+                // Trim whitespace to check if we have actual content
+                auto before_trimmed = before.trimmed();
+                auto after_trimmed = after.trimmed();
+                if (before_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
 
-            //...
+                auto initial_role = initial_element->role();
+                auto initial_eot = initial_element->eot();
+
+                // Set up the new elements
+                LoadPlan::Item middle_item
+                {
+                    get_role(initial_role), // This will be changed by mouse chord
+                    {},
+                    initial_eot
+                };
+
+                LoadPlan::Item after_item
+                {
+                    initial_role,
+                    after_trimmed,
+                    initial_eot
+                };
+
+                // Insert the elements - after first, then middle (which puts
+                // middle between initial and after)
+                insertElement_((index + 1), after_item);
+                insertElement_((index + 1), middle_item);
+
+                // Update the intial element's speech
+                initial_element->setSpeech(before_trimmed);
+            }
+            else // has_selection
+            {
+                // 3. Break into 3 with selection in the middle element
+
+                auto selection_start = cursor.selectionStart();
+                auto selection_end = cursor.selectionEnd();
+
+                // Validate we have text on both sides of the selection
+                if (selection_start <= 0 || selection_end >= text.length()) return;
+
+                // Split the text
+                auto before = text.left(selection_start);
+                auto middle = cursor.selection().toPlainText();
+                auto after = text.mid(selection_end);
+
+                // Trim whitespace to check if we have actual content
+                auto before_trimmed = before.trimmed();
+                auto middle_trimmed = middle.trimmed();
+                auto after_trimmed = after.trimmed();
+
+                // Check that we don't have only whitespace in any part
+                if (before_trimmed.isEmpty() || middle_trimmed.isEmpty() || after_trimmed.isEmpty()) return;
+
+                auto initial_role = initial_element->role();
+                auto initial_eot = initial_element->eot();
+
+                // Create middle element with selection text
+                LoadPlan::Item middle_item
+                {
+                    get_role(initial_role),
+                    middle_trimmed,
+                    initial_eot
+                };
+
+                // Create after element
+                LoadPlan::Item after_item
+                {
+                    initial_role,
+                    after_trimmed,
+                    initial_eot
+                };
+
+                // Insert the elements - after first, then middle (which puts middle between initial and after)
+                insertElement_((index + 1), after_item);
+                insertElement_((index + 1), middle_item);
+
+                // Update the initial element's speech
+                initial_element->setSpeech(before_trimmed);
+            }
         }
     }
 
@@ -237,6 +318,9 @@ private:
 
     QString currentPath_{};
     QPointer<AutoSizeTextEdit> currentEdit_{};
+
+    // Click is a press & release
+    bool ignoreNextElementSpeechEditMiddleClick_ = false;
 
     //CommandStack* commandStack_ = new CommandStack(this);
 
@@ -357,6 +441,20 @@ private:
             &AutoSizeTextEdit::rockeredRight,
             this,
             [&] { split(); }
+        );
+
+        connect
+        (
+            element->speechEdit(),
+            &AutoSizeTextEdit::middleClicked,
+            this,
+            [&]
+            {
+                if (ignoreNextElementSpeechEditMiddleClick_)
+                    ignoreNextElementSpeechEditMiddleClick_ = false;
+                else
+                    split();
+            }
         );
 
         connect
@@ -583,7 +681,7 @@ private slots:
     {
         // This is definitely dumbly coded:
 
-        /*if (key < 0) return;
+        if (key < 0) return;
 
         // Leave this function open to handle other keys, but pass to an
         // interrupt_ function that takes a role index arg for keys 1 through 9
@@ -593,25 +691,21 @@ private slots:
         switch (key)
         {
         default: break; // Leave -1 if not 1-9, could handle other keys later for other ops
-        case Qt::Key_1: i = 1; break;
-        case Qt::Key_2: i = 2; break;
-        case Qt::Key_3: i = 3; break;
-        case Qt::Key_4: i = 4; break;
-        case Qt::Key_5: i = 5; break;
-        case Qt::Key_6: i = 6; break;
-        case Qt::Key_7: i = 7; break;
-        case Qt::Key_8: i = 8; break;
-        case Qt::Key_9: i = 9; break;
+        case Qt::Key_1: i = 0; break;
+        case Qt::Key_2: i = 1; break;
+        case Qt::Key_3: i = 2; break;
+        case Qt::Key_4: i = 3; break;
+        case Qt::Key_5: i = 4; break;
+        case Qt::Key_6: i = 5; break;
+        case Qt::Key_7: i = 6; break;
+        case Qt::Key_8: i = 7; break;
+        case Qt::Key_9: i = 8; break;
         }
 
-        i = qBound(1, i, roleChoices_.count());
-        auto new_element_index = split();
+        if (i == -1) return;
 
-        // Unsure whether to use new_element_index > -1 or new_element_index > 0
-        if (i > -1 && new_element_index > -1)
-        {
-            auto interruption_index = insertElement_(new_element_index, { roleChoices_.at(i - 1) });
-            elements_.at(static_cast<qsizetype>(interruption_index - 1))->setEot(false);
-        }*/
+        ignoreNextElementSpeechEditMiddleClick_ = true;
+        i = qBound(0, i, (roleChoices_.count() - 1));
+        split(true, i);
     }
 };
