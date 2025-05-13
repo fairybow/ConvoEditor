@@ -3,7 +3,6 @@
 #include <QApplication>
 #include <QCheckBox>
 #include <QColor>
-#include <QComboBox>
 #include <QDebug>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -18,6 +17,7 @@
 
 #include "AutoSizeTextEdit.h"
 #include "EotCheck.h"
+#include "RoleSelector.h"
 #include "Utility.h"
 
 // For role removal, we would want a pop-up that asks what to set all roles
@@ -43,7 +43,7 @@ public:
     void setSpeech(const QString& speech) { speechEdit_->setPlainText(speech); }
     bool eot() const { return eotCheck_->isChecked(); }
     void setEot(bool eot) { eotCheck_->setChecked(eot); }
-    QComboBox* roleSelector() const noexcept { return roleSelector_; }
+    RoleSelector* roleSelector() const noexcept { return roleSelector_; }
     AutoSizeTextEdit* speechEdit() const noexcept { return speechEdit_; }
     EotCheck* eotCheck() const noexcept { return eotCheck_; }
 
@@ -89,7 +89,7 @@ private:
     QList<QColor> visualCueColors_{};
 
     // States
-    QComboBox* roleSelector_ = new QComboBox(this);
+    RoleSelector* roleSelector_ = new RoleSelector(this);
     AutoSizeTextEdit* speechEdit_ = new AutoSizeTextEdit(this);
     EotCheck* eotCheck_ = new EotCheck(this);
 
@@ -160,7 +160,7 @@ private:
         connect
         (
             roleSelector_,
-            &QComboBox::currentIndexChanged,
+            &RoleSelector::currentIndexChanged,
             this,
             &Element::onRoleSelectorIndexChanged_
         );
