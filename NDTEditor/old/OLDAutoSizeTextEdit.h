@@ -1,15 +1,84 @@
-#pragma once
+/*#pragma once
 
 #include <QFocusEvent>
 #include <QKeyEvent>
 #include <QMargins>
 #include <QMouseEvent>
+#include <QMutex>
+#include <QMutexLocker>
+#include <QObject>
 #include <QResizeEvent>
 #include <QSize>
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextEdit>
+#include <QTimer>
 #include <QWheelEvent>
+
+// Nest, rename to Global, and move to cpp when we un-header all this
+class AutoSizeTextEditGlobal : public QObject
+{
+    Q_OBJECT
+
+public:
+    static AutoSizeTextEditGlobal& instance()
+    {
+        // C++ 11 guarantees that this initialization is thread-safe
+        static AutoSizeTextEditGlobal self;
+        return self;
+    }
+
+    int mmbHeldKey() const
+    {
+        QMutexLocker locker(&mutex_);
+        return mmbHeldKey_;
+    }
+
+    void setMmbHeldKey(int mmbHeldKey)
+    {
+        QMutexLocker locker(&mutex_);
+        mmbHeldKey_ = mmbHeldKey;
+    }
+
+    void mmbHeldKeyDebounce()
+    {
+        QMutexLocker locker(&mutex_);
+        mmbHeldKeyDebouncer_.start(500);
+    }
+
+    bool mmbHeldKeyDebouncerIsActive() const
+    {
+        QMutexLocker locker(&mutex_);
+        return mmbHeldKeyDebouncer_.isActive();
+    }
+
+private:
+    mutable QMutex mutex_;
+    QTimer mmbHeldKeyDebouncer_;
+    int mmbHeldKey_ = -1;
+
+    AutoSizeTextEditGlobal()
+        : QObject(nullptr)
+    {
+        mmbHeldKeyDebouncer_.setSingleShot(true);
+
+        connect
+        (
+            &mmbHeldKeyDebouncer_,
+            &QTimer::timeout,
+            this,
+            [&]
+            {
+                QMutexLocker locker(&mutex_);
+                mmbHeldKey_ = -1;
+            }
+        );
+    }
+
+    ~AutoSizeTextEditGlobal() = default;
+    AutoSizeTextEditGlobal(const AutoSizeTextEditGlobal&) = delete;
+    AutoSizeTextEditGlobal& operator=(const AutoSizeTextEditGlobal&) = delete;
+};
 
 // Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
@@ -98,11 +167,9 @@ public:
     }
 
 signals:
-    void rockeredLeft();
-    void rockeredRight();
-    void middleClicked();
-    void middlePressed();
-    void mouseChorded(int key);
+    void leftRockered();
+    void rightRockered();
+    void middleClickReleased(int key = -1);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event) override
@@ -130,7 +197,7 @@ protected:
             if (rmbPressed_)
             {
                 // Right button is already held, left click detected
-                emit rockeredLeft();
+                emit leftRockered();
                 event->accept();
                 return;
             }
@@ -142,7 +209,7 @@ protected:
             if (lmbPressed_)
             {
                 // Left button is already held, right click detected
-                emit rockeredRight();
+                emit rightRockered();
                 event->accept();
                 return;
             }
@@ -152,7 +219,6 @@ protected:
         else if (event->button() == Qt::MiddleButton)
         {
             mmbPressed_ = true;
-            emit middlePressed();
         }
 
         QTextEdit::mousePressEvent(event);
@@ -167,7 +233,19 @@ protected:
         else if (event->button() == Qt::MiddleButton)
         {
             mmbPressed_ = false;
-            emit middleClicked();
+
+            auto& global = AutoSizeTextEditGlobal::instance();
+            auto held_key = global.mmbHeldKey();
+            emit middleClickReleased(held_key);
+
+            // When a key is held, it will auto-repeat. So, the press & release
+            // events will continuously fire one after the other. We can't rely
+            // on keyReleaseEvent for our exit condition, and we still need to
+            // block mmbHeldKey_ till its release. Blocking this prevents the
+            // awkward "I accidentally typed my gesture key because I released
+            // MMB a little early" issue
+            if (held_key > -1)
+                global.mmbHeldKeyDebounce(); // maybeDebounce()? Pack more of the conditionals into Global?
         }
 
         QTextEdit::mouseReleaseEvent(event);
@@ -176,10 +254,18 @@ protected:
     virtual void keyPressEvent(QKeyEvent* event) override
     {
         auto key = event->key();
+        auto& global = AutoSizeTextEditGlobal::instance();
 
         if (mmbPressed_)
         {
-            emit mouseChorded(key);
+            global.setMmbHeldKey(key);
+            event->ignore();
+            return;
+        }
+
+        if (key == global.mmbHeldKey() && global.mmbHeldKeyDebouncerIsActive())
+        {
+            global.mmbHeldKeyDebounce();
             event->ignore();
             return;
         }
@@ -231,3 +317,4 @@ private slots:
             setFixedHeight(y);
     }
 };
+*/

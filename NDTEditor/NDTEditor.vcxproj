@@ -30,6 +30,7 @@
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="old\OLDAutoSizeTextEdit.h" />
     <ClInclude Include="old\OLDElementBlock.h" />
     <QtMoc Include="src\InsertButton.h" />
     <QtMoc Include="src\EotCheck.h" />

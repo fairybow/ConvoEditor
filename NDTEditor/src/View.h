@@ -91,7 +91,7 @@ public:
         return Io::write(document, currentPath_);
     }
 
-    int split()
+    int oldSplit()
     {
         if (!currentEdit_) return -1;
 
@@ -155,6 +155,22 @@ public:
         // Maybe let insertElement_ focus new element's text
 
         return new_element_index;
+    }
+
+    int split()
+    {
+        // State will depend on mouse chords. No chords will just copy state (the new element(s) will have same states). This function won't handle chords/keys, but will need parameters to mark "interruption" vs just splitting (the latter implying the 1st element should be marked EOT false). Other chords will set role for the new element (either 2nd or middle)
+
+        // For example, splitting with highlight by using MMB would split into 3 elements that all share state (role, speech, eot). Splitting same highlighted with MMB+2 would split into 3 elements where 1st's role is same, 2nd's role is role 2 (our key), and 3rd's role is same as 1st. And doing something like MMB+Alt+2 would be an interruption, where we do the same as before (with new 2 role in middle) but also mark the 1st element as EOT false (this speaker role was interrupted).
+
+        // If cursor is chilling somewhere, without a highlight, we split the element into 2, placing the text after the cursor in the new element.
+
+        // If the cursor is highlighting something, we split the element into 3, placing the highlighted text in the 2nd, and the text after it in the 3rd, leaving the portion before the highlight in the 1st.
+
+        // If there's no highlight, we can still provide a force parameter to make 3 elements instead of 2.
+
+
+
     }
 
     void autoEot()
@@ -327,7 +343,7 @@ private:
         connect
         (
             element->speechEdit(),
-            &AutoSizeTextEdit::leftRockered,
+            &AutoSizeTextEdit::rockeredRight,
             this,
             [&] { split(); }
         );
@@ -335,17 +351,9 @@ private:
         connect
         (
             element->speechEdit(),
-            &AutoSizeTextEdit::rightRockered,
+            &AutoSizeTextEdit::mouseChorded,
             this,
-            [&] { split(); }
-        );
-
-        connect
-        (
-            element->speechEdit(),
-            &AutoSizeTextEdit::middleClickReleased,
-            this,
-            &View::onElementSpeechEditMMBReleased_
+            &View::onElementSpeechEditMouseChorded_
         );
 
         connect
@@ -560,7 +568,7 @@ private slots:
         updateInsertButtonPositions_(index + 1);
     }
 
-    void onElementSpeechEditMMBReleased_(int key)
+    void onElementSpeechEditMouseChorded_(int key)
     {
         // This is definitely dumbly coded:
 
