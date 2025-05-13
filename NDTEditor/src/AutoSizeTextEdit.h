@@ -101,7 +101,6 @@ signals:
     void rockeredLeft();
     void rockeredRight();
     void middleClicked();
-    void middlePressed();
     void mouseChorded(int key);
 
 protected:
@@ -147,6 +146,9 @@ protected:
                 return;
             }
 
+            // Allow RMB to set cursor
+            auto cursor = cursorForPosition(event->pos());
+            setTextCursor(cursor);
             rmbPressed_ = true;
         }
         else if (event->button() == Qt::MiddleButton)
@@ -154,9 +156,7 @@ protected:
             // Allow MMB to set cursor
             auto cursor = cursorForPosition(event->pos());
             setTextCursor(cursor);
-
             mmbPressed_ = true;
-            emit middlePressed();
         }
 
         QTextEdit::mousePressEvent(event);

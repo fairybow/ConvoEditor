@@ -440,6 +440,14 @@ private:
         connect
         (
             element->speechEdit(),
+            &AutoSizeTextEdit::rockeredLeft,
+            this,
+            [&] { split(); }
+        );
+
+        connect
+        (
+            element->speechEdit(),
             &AutoSizeTextEdit::rockeredRight,
             this,
             [&] { split(); }
