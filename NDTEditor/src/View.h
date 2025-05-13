@@ -92,20 +92,19 @@ public:
         return Io::write(document, currentPath_);
     }
 
+    // Splits text elements at cursor position in three ways:
+    // 1. Bipart (2-way): No selection -> splits at cursor into before/after
+    // 2. Empty Tripart: No selection but forceTripart-> adds empty middle
+    //    element
+    // 3. Selection Tripart: With selection -> places selected text in middle
+    // 
+    // Triggered by: right rocker or MMB click. Making a mouse chord (MMB + n)
+    // will force tripart regardless of selection and assign n role to the
+    // middle element (useful for quickly splitting as an interruption)
+    // 
+    // Automatically adjusts EOT based on punctuation.
     void split(bool forceTripart = false, int tripartRole = -1)
     {
-        // Prabably should no longer return an index, given that for tripart it isn't clear which we would return
-
-        // State will depend on mouse chords. No chords will just copy state (the new element(s) will have same states). This function won't handle chords/keys, but will need parameters to mark "interruption" vs just splitting (the latter implying the 1st element should be marked EOT false). Other chords will set role for the new element (either 2nd or middle)
-
-        // For example, splitting with highlight by using MMB would split into 3 elements that all share state (role, speech, eot). Splitting same highlighted with MMB+2 would split into 3 elements where 1st's role is same, 2nd's role is role 2 (our key), and 3rd's role is same as 1st. And doing something like MMB+Alt+2 would be an interruption, where we do the same as before (with new 2 role in middle) but also mark the 1st element as EOT false (this speaker role was interrupted).
-
-        // If cursor is chilling somewhere, without a highlight, we split the element into 2, placing the text after the cursor in the new element.
-
-        // If the cursor is highlighting something, we split the element into 3, placing the highlighted text in the 2nd, and the text after it in the 3rd, leaving the portion before the highlight in the 1st.
-
-        // If there's no highlight, we can still provide a force parameter to make 3 elements instead of 2.
-
         if (!currentEdit_) return;
 
         // Find the parent Element by traversing up the widget hierarchy
@@ -161,6 +160,7 @@ public:
 
             // Update the intial element's speech
             initial_element->setSpeech(before_trimmed);
+            eotAdjust_(initial_element);
         }
         else // has_selection || forceTripart
         {
@@ -193,9 +193,9 @@ public:
                 // Set up the new elements
                 LoadPlan::Item middle_item
                 {
-                    get_role(initial_role), // This will be changed by mouse chord
+                    get_role(initial_role),
                     {},
-                    initial_eot
+                    false
                 };
 
                 LoadPlan::Item after_item
@@ -212,6 +212,7 @@ public:
 
                 // Update the intial element's speech
                 initial_element->setSpeech(before_trimmed);
+                eotAdjust_(initial_element);
             }
             else // has_selection
             {
@@ -244,7 +245,7 @@ public:
                 {
                     get_role(initial_role),
                     middle_trimmed,
-                    initial_eot
+                    false
                 };
 
                 // Create after element
@@ -257,10 +258,12 @@ public:
 
                 // Insert the elements - after first, then middle (which puts middle between initial and after)
                 insertElement_((index + 1), after_item);
-                insertElement_((index + 1), middle_item);
+                auto middle_index = insertElement_((index + 1), middle_item);
 
                 // Update the initial element's speech
                 initial_element->setSpeech(before_trimmed);
+                eotAdjust_(initial_element);
+                eotAdjust_(elements_.at(middle_index));
             }
         }
     }
@@ -271,18 +274,7 @@ public:
             currentEdit_->trim();
 
         for (auto& element : elements_)
-        {
-            auto speech = element->speech().trimmed();
-            if (speech.isEmpty()) continue;
-
-            if (speech.endsWith('.') || speech.endsWith('!') || speech.endsWith('?'))
-            {
-                element->setEot(true);
-                continue;
-            }
-
-            element->setEot(false);
-        }
+            eotAdjust_(element);
     }
 
 signals:
@@ -352,6 +344,24 @@ private:
             this,
             &View::onQAppFocusChanged_
         );
+    }
+
+    void eotAdjust_(Element* element)
+    {
+        if (!element) return;
+
+        auto speech = element->speech().trimmed();
+        if (speech.isEmpty()) return;
+
+        // Set EOT based on whether the speech ends with terminal punctuation
+        constexpr auto set_eot = [](const QString& s)
+            {
+                return s.endsWith('.') ||
+                    s.endsWith('!') ||
+                    s.endsWith('?');
+            };
+
+        element->setEot(set_eot(speech));
     }
 
     LoadPlan parse_(const QJsonDocument& document)
