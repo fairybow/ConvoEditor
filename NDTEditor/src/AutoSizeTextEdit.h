@@ -10,6 +10,7 @@
 #include <QTextDocument>
 #include <QTextEdit>
 #include <QWheelEvent>
+#include <QList>
 
 // Why doesn't this work with QPlainTextEdit?
 class AutoSizeTextEdit : public QTextEdit
@@ -56,47 +57,58 @@ public:
         updateHeight_();
     }
 
-    void trim()
+    void simplify()
     {
-        // Remove leading and trailing whitespace, as well as extra whitespace
-        // in-between words
         auto current = toPlainText();
-        auto trimmed = current.trimmed();
+        auto simplified = current.simplified();
+        if (current == simplified) return;
 
-        // Only update if the text actually changed
-        if (current != trimmed)
+        auto cursor = textCursor();
+        auto initial_cursor_pos = cursor.position();
+
+        // Build position mapping between original and normalized text
+        QList<int> map(current.length());
+        auto simplified_pos = 0;
+
+        // Skip leading whitespace in original
+        auto leading_spaces = 0;
+
+        while (leading_spaces < current.length() && current[leading_spaces].isSpace())
+            leading_spaces++;
+
+        auto last_c_was_space = false;
+
+        for (auto i = 0; i < current.length(); i++)
         {
-            // Save cursor position relative to non-whitespace content
-            auto cursor = textCursor();
+            map[i] = simplified_pos;
+            if (i < leading_spaces) continue;
 
-            auto original_cursor_pos = cursor.position();
-            auto leading_spaces = 0;
-
-            // Count leading whitespace in original text
-            for (auto i = 0; i < current.length() && current[i].isSpace(); ++i)
+            if (current[i].isSpace())
             {
-                leading_spaces++;
-            }
-
-            // Set the trimmed text
-            setPlainText(trimmed);
-
-            // Adjust cursor position
-            if (original_cursor_pos > leading_spaces)
-            {
-                // Cursor was after leading whitespace
-                auto new_cursor_pos = original_cursor_pos - leading_spaces;
-                new_cursor_pos = qBound(0, new_cursor_pos, trimmed.length());
-                cursor.setPosition(new_cursor_pos);
+                if (!last_c_was_space)
+                {
+                    simplified_pos++;
+                    last_c_was_space = true;
+                }
             }
             else
             {
-                // Cursor was in leading whitespace, move to beginning
-                cursor.setPosition(0);
+                simplified_pos++;
+                last_c_was_space = false;
             }
-
-            setTextCursor(cursor);
         }
+
+        setPlainText(simplified);
+
+        // Adjust cursor position (if it was at the end, map length may be
+        // exceeded)
+        auto new_pos = (initial_cursor_pos >= map.size())
+            ? simplified.length()
+            : map[initial_cursor_pos];
+
+        new_pos = qBound(0, new_pos, simplified.length());
+        cursor.setPosition(new_pos);
+        setTextCursor(cursor);
     }
 
 signals:
@@ -115,7 +127,7 @@ protected:
     virtual void focusOutEvent(QFocusEvent* event) override
     {
         QTextEdit::focusOutEvent(event);
-        trim();
+        simplify();
     }
 
     virtual void wheelEvent(QWheelEvent* event) override

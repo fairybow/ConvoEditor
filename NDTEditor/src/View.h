@@ -87,7 +87,7 @@ public:
     bool save()
     {
         if (currentPath_.isEmpty()) return false;
-        if (currentEdit_) currentEdit_->trim();
+        if (currentEdit_) currentEdit_->simplify();
 
         auto document = compile_();
         if (document.isNull()) return false;
@@ -307,7 +307,7 @@ public:
     void autoEot()
     {
         if (currentEdit_)
-            currentEdit_->trim();
+            currentEdit_->simplify();
 
         for (auto& element : elements_)
             eotAdjust_(element);
