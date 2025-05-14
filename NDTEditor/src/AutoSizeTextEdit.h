@@ -116,7 +116,7 @@ signals:
     void rockeredLeft();
     void rockeredRight();
     void middleClicked();
-    void mouseChorded(Qt::Key key, Qt::KeyboardModifiers modifiers);
+    void mouseChorded(int key, Qt::KeyboardModifiers modifiers);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event) override
@@ -196,11 +196,8 @@ protected:
 
         if (mmbPressed_)
         {
-            if (key != Qt::Key_unknown && key > 0)
-            {
-                if (!isModifier_(key))
-                    emit mouseChorded(static_cast<Qt::Key>(key), event->modifiers());
-            }
+            if (key != Qt::Key_unknown && key > 0 && !isModifier_(key))
+                emit mouseChorded(key, event->modifiers());
 
             event->ignore();
             return;
@@ -265,3 +262,4 @@ private slots:
             || key == Qt::Key_Meta;
     }
 };
+ 
