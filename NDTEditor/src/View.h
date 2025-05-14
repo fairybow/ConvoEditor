@@ -692,7 +692,7 @@ private slots:
     // add break indicators to beginning or end of text in field (not as part of
     // split, because a tripart would still involve deducing the break, which is
     // too complicated for smol bean brain
-    void onSpeechEditMouseChorded_(Qt::Key key, Qt::KeyboardModifiers modifiers) // Qt::KeyCombo or whatever it is?
+    void onSpeechEditMouseChorded_(int key, Qt::KeyboardModifiers modifiers) // Qt::KeyCombo or whatever it is?
     {
         auto i = -1;
 
