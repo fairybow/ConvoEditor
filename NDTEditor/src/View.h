@@ -132,11 +132,18 @@ public:
             // Validate we have text on both sides of cursor
             if (position <= 0 || position >= text.length()) return;
 
+            /// TEST
+            auto is_break = Utility::wouldBreakWord(text, position);
+
             // Split the text
             before_text = text.left(position).trimmed();
             auto after_text = text.mid(position).trimmed();
             Utility::shiftPunct(before_text, after_text);
             if (before_text.isEmpty() || after_text.isEmpty()) return;
+
+            /// TEST
+            if (is_break)
+                Utility::applyBreakIndicators(before_text, after_text);
 
             // Create element plan
             LoadPlan::Item item
@@ -178,11 +185,18 @@ public:
                 // Validate we have text on both sides of cursor
                 if (position <= 0 || position >= text.length()) return;
 
+                /// TEST
+                auto is_break = Utility::wouldBreakWord(text, position);
+
                 // Split the text
                 before_text = text.left(position).trimmed();
                 auto after_text = text.mid(position).trimmed();
                 Utility::shiftPunct(before_text, after_text);
                 if (before_text.isEmpty() || after_text.isEmpty()) return;
+
+                /// TEST
+                if (is_break)
+                    Utility::applyBreakIndicators(before_text, after_text);
 
                 auto initial_role = initial_element->role();
 
@@ -220,6 +234,11 @@ public:
                 // Validate we have text on both sides of the selection
                 if (selection_start <= 0 || selection_end >= text.length()) return;
 
+                /// TEST
+                auto first_is_break = Utility::wouldBreakWord(text, selection_start);
+                /// TEST
+                auto second_is_break = Utility::wouldBreakWord(text, selection_end);
+
                 // Split the text
                 before_text = text.left(selection_start).trimmed();
                 auto middle_text = cursor.selection().toPlainText().trimmed();
@@ -227,6 +246,13 @@ public:
                 Utility::shiftPunct(before_text, middle_text);
                 Utility::shiftPunct(middle_text, after_text);
                 if (before_text.isEmpty() || middle_text.isEmpty() || after_text.isEmpty()) return;
+
+                /// TEST
+                if (first_is_break)
+                    Utility::applyBreakIndicators(before_text, middle_text);
+                /// TEST
+                if (second_is_break)
+                    Utility::applyBreakIndicators(middle_text, after_text);
 
                 // Create element plans
                 auto initial_role = initial_element->role();
@@ -694,6 +720,9 @@ private slots:
     // too complicated for smol bean brain
     void onSpeechEditMouseChorded_(int key, Qt::KeyboardModifiers modifiers) // Qt::KeyCombo or whatever it is?
     {
+        // Don't continue with the split even if a no-op key is chorded
+        ignoreNextSpeechEditMClick_ = true;
+
         auto i = -1;
 
         // May handle other chords later
@@ -711,9 +740,9 @@ private slots:
         case Qt::Key_9: i = 8; break;
         }
 
-        if (i == -1) return; // HOWEVER, if a key was pressed we probably shouldn't continue with the split.
+        if (i == -1) return;
 
-        ignoreNextSpeechEditMClick_ = true;
-        split(true, qBound(0, i, (roleChoices_.count() - 1)));
+        auto max = roleChoices_.count() - 1;
+        split(true, qBound(0, i, max));
     }
 };
