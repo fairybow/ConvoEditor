@@ -13,9 +13,9 @@
 #include "View.h"
 
 /// For testing:
-#include <QTimer>
-#include <QStandardPaths>
 #include <QDir>
+#include <QStandardPaths>
+#include <QTimer>
 
 class MainWindow : public QMainWindow
 {
