@@ -4,10 +4,12 @@
 #include <cmath>
 #include <numbers>
 
+#include <QChar>
 #include <QColor>
 #include <QList>
 #include <QMargins>
 #include <QSet>
+#include <QString>
 
 namespace Utility
 {
@@ -84,5 +86,30 @@ namespace Utility
         }
 
         return result;
+    }
+
+    inline void shiftPunct(QString& before, QString& after)
+    {
+        // Before: "This is before"
+        // After: "... This is after."
+        // Resolved: "This is before...", "This is after."
+        if (after.isEmpty() || !after.at(0).isPunct()) return;
+
+        // Find where punctuation ends and shift it
+        auto punct_end = 0;
+        while (punct_end < after.length()
+            && after.at(punct_end).isPunct())
+            punct_end++;
+
+        before += after.left(punct_end);
+        after.remove(0, punct_end);
+
+        // Trim leading whitespace from after
+        auto space_end = 0;
+        while (space_end < after.length()
+            && after.at(space_end).isSpace())
+            space_end++;
+
+        after.remove(0, space_end);
     }
 }

@@ -146,16 +146,14 @@ protected:
                 return;
             }
 
-            // Allow RMB to set cursor
-            auto cursor = cursorForPosition(event->pos());
-            setTextCursor(cursor);
+            // Allow RMB to set cursor unless there's a selection
+            setCursorOnNoSelection_(event);
             rmbPressed_ = true;
         }
         else if (event->button() == Qt::MiddleButton)
         {
-            // Allow MMB to set cursor
-            auto cursor = cursorForPosition(event->pos());
-            setTextCursor(cursor);
+            // Allow MMB to set cursor unless there's a selection
+            setCursorOnNoSelection_(event);
             mmbPressed_ = true;
         }
 
@@ -201,11 +199,6 @@ protected:
         }
     }
 
-    //virtual void keyReleaseEvent(QKeyEvent* event) override
-    //{
-    //    QTextEdit::keyReleaseEvent(event);
-    //}
-
 private:
     bool lmbPressed_ = false;
     bool mmbPressed_ = false;
@@ -233,5 +226,14 @@ private slots:
         // Only update if height actually changed to avoid infinite resize loops
         if (y != height())
             setFixedHeight(y);
+    }
+
+    void setCursorOnNoSelection_(QMouseEvent* event)
+    {
+        auto cursor = textCursor();
+        if (cursor.hasSelection()) return;
+
+        cursor = cursorForPosition(event->pos());
+        setTextCursor(cursor);
     }
 };

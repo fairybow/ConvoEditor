@@ -27,7 +27,7 @@ namespace Eot
             || cleaned == "hmm";
     };
 
-    inline bool hasTerminalPunc(const QString& string)
+    inline bool hasTerminalPunct(const QString& string)
     {
         return string.endsWith('.')
             || string.endsWith('!')

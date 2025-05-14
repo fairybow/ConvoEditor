@@ -147,6 +147,7 @@ public:
             // Split the text
             before_text = text.left(position).trimmed();
             auto after_text = text.mid(position).trimmed();
+            Utility::shiftPunct(before_text, after_text);
             if (before_text.isEmpty() || after_text.isEmpty()) return;
 
             // Set up the new element
@@ -192,6 +193,7 @@ public:
                 // Split the text
                 before_text = text.left(position).trimmed();
                 auto after_text = text.mid(position).trimmed();
+                Utility::shiftPunct(before_text, after_text);
                 if (before_text.isEmpty() || after_text.isEmpty()) return;
 
                 auto initial_role = initial_element->role();
@@ -234,6 +236,8 @@ public:
                 before_text = text.left(selection_start).trimmed();
                 auto middle_text = cursor.selection().toPlainText().trimmed();
                 auto after_text = text.mid(selection_end).trimmed();
+                Utility::shiftPunct(before_text, middle_text);
+                Utility::shiftPunct(middle_text, after_text);
                 if (before_text.isEmpty() || middle_text.isEmpty() || after_text.isEmpty()) return;
 
                 auto initial_role = initial_element->role();
@@ -383,7 +387,7 @@ private:
             return;
         }
 
-        element->setEot(Eot::hasTerminalPunc(speech));
+        element->setEot(Eot::hasTerminalPunct(speech));
     }
 
     LoadPlan parse_(const QJsonDocument& document)
