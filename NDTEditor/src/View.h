@@ -11,6 +11,7 @@
 #include <QJsonValue>
 #include <QLayoutItem>
 #include <QList>
+#include <QMargins>
 #include <QPointer>
 #include <QRegularExpression>
 #include <QScrollArea>
@@ -23,8 +24,6 @@
 #include <QWidget>
 
 #include "AutoSizeTextEdit.h"
-//#include "Command.h"
-//#include "CommandStack.h"
 #include "Element.h"
 #include "InsertButton.h"
 #include "Io.h"
@@ -43,18 +42,12 @@ public:
         initialize_();
     }
 
-    /*CommandStack* commandStack() const noexcept
-    {
-        return commandStack_;
-    }*/
-
     bool load(const QString& path)
     {
         auto document = Io::read(path);
         if (document.isNull()) return false;
 
         // No errors, so loading will proceed
-
         QList<Element*> old_elements = elements_;
         QList<InsertButton*> old_insert_buttons = insertButtons_;
         QList<QString> old_role_choices = roleChoices_;
@@ -70,6 +63,7 @@ public:
             clearAllWidgets_();
             populate_(plan);
             scrollArea_->verticalScrollBar()->setValue(0);
+
             emit documentLoaded();
             return true;
         }
@@ -78,18 +72,18 @@ public:
         elements_ = old_elements;
         insertButtons_ = old_insert_buttons;
         roleChoices_ = old_role_choices;
+
         return false;
     }
 
     bool save()
     {
         if (currentPath_.isEmpty()) return false;
-
-        if (currentEdit_)
-            currentEdit_->trim();
+        if (currentEdit_) currentEdit_->trim();
 
         auto document = compile_();
         if (document.isNull()) return false;
+
         return Io::write(document, currentPath_);
     }
 
@@ -97,9 +91,9 @@ public:
     {
         // Splits text elements at cursor position in three ways:
         // 1. Bipart (2-way): No selection -> splits at cursor into before/after
-        // 2. Empty Tripart: No selection but forceTripart-> adds empty middle
+        // 2. Empty tripart: No selection but forceTripart-> adds empty middle
         //    element
-        // 3. Selection Tripart: With selection -> places selected text in
+        // 3. Selection tripart: With selection -> places selected text in
         //    middle
         // 
         // Triggered by: right rocker or MMB click. Making a mouse chord (MMB +
@@ -113,8 +107,7 @@ public:
         Element* initial_element = nullptr;
 
         for (auto widget = currentEdit_->parentWidget();
-            widget;
-            widget = widget->parentWidget())
+            widget; widget = widget->parentWidget())
         {
             if (auto next = qobject_cast<Element*>(widget))
             {
@@ -295,10 +288,9 @@ private:
 
     QVBoxLayout* mainLayout_ = nullptr;
     QScrollArea* scrollArea_ = new QScrollArea(this);
-    QWidget* elementsLayoutContainer_ = new QWidget(scrollArea_);
+    QWidget* contentContainer_ = new QWidget(scrollArea_);
+    QVBoxLayout* contentLayout_ = nullptr;
 
-    // Not keeping JsonDocument. View is SSOT
-    QVBoxLayout* elementsLayout_ = nullptr;
     QList<Element*> elements_{};
     QList<InsertButton*> insertButtons_{};
     QList<QString> roleChoices_{};
@@ -307,7 +299,7 @@ private:
     QPointer<AutoSizeTextEdit> currentEdit_{};
 
     // Click is a press & release
-    bool ignoreNextElementSpeechEditMiddleClick_ = false;
+    bool ignoreNextSpeechEditMClick_ = false;
 
     //CommandStack* commandStack_ = new CommandStack(this);
 
@@ -322,13 +314,13 @@ private:
         scrollArea_->setWidgetResizable(true);
         scrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         scrollArea_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-        scrollArea_->setWidget(elementsLayoutContainer_);
+        scrollArea_->setWidget(contentContainer_);
 
         // Set up layouts
         // Align center causes widgets to take up their preferred size rather
         // than stretching to fill the available width
         mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this, Qt::AlignCenter);
-        elementsLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(elementsLayoutContainer_, Qt::AlignCenter);
+        contentLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(contentContainer_, Qt::AlignCenter);
 
         mainLayout_->addWidget(scrollArea_);
 
@@ -446,7 +438,7 @@ private:
     {
         QLayoutItem* item = nullptr;
 
-        while ((item = elementsLayout_->takeAt(0)) != nullptr)
+        while ((item = contentLayout_->takeAt(0)) != nullptr)
         {
             if (auto widget = item->widget())
                 delete widget;
@@ -496,8 +488,8 @@ private:
             this,
             [&]
             {
-                if (ignoreNextElementSpeechEditMiddleClick_)
-                    ignoreNextElementSpeechEditMiddleClick_ = false;
+                if (ignoreNextSpeechEditMClick_)
+                    ignoreNextSpeechEditMClick_ = false;
                 else
                     split();
             }
@@ -518,21 +510,11 @@ private:
             this,
             &View::onElementDeleteRequested_
         );
-
-        /*auto eot_check = element->eotCheck();
-
-        connect
-        (
-            eot_check,
-            &EotCheck::toggled,
-            this,
-            [=](bool checked) { onElementEotCheckToggled_(eot_check, checked); }
-        );*/
     }
 
     InsertButton* insertInsertButton_(int position)
     {
-        auto button_container = new QWidget(elementsLayoutContainer_);
+        auto button_container = new QWidget(contentContainer_);
 
         auto container_layout = Utility::newLayout<QHBoxLayout>
             (
@@ -547,7 +529,7 @@ private:
         container_layout->addWidget(button);
 
         // Button at position n goes at layout index n * 2
-        elementsLayout_->insertWidget((position * 2), button_container);
+        contentLayout_->insertWidget((position * 2), button_container);
 
         button->setText("+");
         button->setFixedSize(25, 25);
@@ -581,7 +563,7 @@ private:
         {
             const auto& item = plan.items().at(i);
 
-            auto element = new Element(elementsLayoutContainer_);
+            auto element = new Element(contentContainer_);
             elements_ << element;
 
             element->setRoleChoices(roleChoices_);
@@ -591,7 +573,7 @@ private:
             element->setEot(item.eot);
 
             // Element goes at layout position (i * 2) + 1
-            elementsLayout_->addWidget(element);
+            contentLayout_->addWidget(element);
             connectElement_(element);
 
             // Add insert button after this element
@@ -601,7 +583,7 @@ private:
 
     int insertElement_(int position, const LoadPlan::Item item = {})
     {
-        auto element = new Element(elementsLayoutContainer_);
+        auto element = new Element(contentContainer_);
         elements_.insert(position, element);
         element->setRoleChoices(roleChoices_);
 
@@ -611,7 +593,7 @@ private:
 
         auto element_layout_lndex = (position * 2) + 1;
 
-        elementsLayout_->insertWidget(element_layout_lndex, element);
+        contentLayout_->insertWidget(element_layout_lndex, element);
         connectElement_(element);
 
         insertInsertButton_(position + 1);
@@ -628,12 +610,6 @@ private:
 
         return elements_.indexOf(element);
     }
-
-    /*void onElementEotCheckToggled_(EotCheck* eotCheck, bool now)
-    {
-        auto command = std::make_unique<EotCheckCommand>(eotCheck, !now, now);
-        commandStack_->push(std::move(command));
-    }*/
 
 private slots:
     void onElementRoleChangeRequested_(const QString& from, const QString& to)
@@ -697,20 +673,22 @@ private slots:
         auto insert_button_layout_index = (index + 1) * 2;
 
         // Remove the element widget from layout
-        auto element_item = elementsLayout_->takeAt(element_layout_index);
-        if (element_item)
+        auto item = contentLayout_->takeAt(element_layout_index);
+
+        if (item)
         {
-            if (auto widget = element_item->widget())
+            if (auto widget = item->widget())
                 delete widget;  // This deletes the Element widget
 
-            delete element_item;
+            delete item;
         }
 
         // Remove the trailing insert button from list
         insertButtons_.removeAt(index + 1);
 
         // Remove the trailing insert button widget from layout
-        auto button_item = elementsLayout_->takeAt(insert_button_layout_index - 1); // -1 because we already removed one item
+        auto button_item = contentLayout_->takeAt(insert_button_layout_index - 1); // -1 because we already removed one item
+
         if (button_item)
         {
             if (auto widget = button_item->widget())
@@ -725,18 +703,15 @@ private slots:
 
     void onElementSpeechEditMouseChorded_(int key)
     {
-        // This is definitely dumbly coded:
-
+        // This is definitely dumbly coded
         if (key < 0) return;
-
-        // Leave this function open to handle other keys, but pass to an
-        // interrupt_ function that takes a role index arg for keys 1 through 9
 
         auto i = -1;
 
+        // May handle other chords later
         switch (key)
         {
-        default: break; // Leave -1 if not 1-9, could handle other keys later for other ops
+        default: break;
         case Qt::Key_1: i = 0; break;
         case Qt::Key_2: i = 1; break;
         case Qt::Key_3: i = 2; break;
@@ -750,8 +725,7 @@ private slots:
 
         if (i == -1) return;
 
-        ignoreNextElementSpeechEditMiddleClick_ = true;
-        i = qBound(0, i, (roleChoices_.count() - 1));
-        split(true, i);
+        ignoreNextSpeechEditMClick_ = true;
+        split(true, qBound(0, i, (roleChoices_.count() - 1)));
     }
 };
