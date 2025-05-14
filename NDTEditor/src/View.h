@@ -13,7 +13,6 @@
 #include <QList>
 #include <QMargins>
 #include <QPointer>
-#include <QRegularExpression>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QString>
@@ -25,11 +24,17 @@
 
 #include "AutoSizeTextEdit.h"
 #include "Element.h"
+#include "Eot.h"
 #include "InsertButton.h"
 #include "Io.h"
 #include "Keys.h"
 #include "LoadPlan.h"
 #include "Utility.h"
+
+// Rename element_layout vars (and etc.) to content_layout or content
+
+// Could do contentIndex overload for buttons and elements, returning correct
+// position based on type
 
 class View : public QWidget
 {
@@ -60,7 +65,7 @@ public:
         if (!plan.isNull())
         {
             currentPath_ = path;
-            clearAllWidgets_();
+            clearAllContent_();
             populate_(plan);
             scrollArea_->verticalScrollBar()->setValue(0);
 
@@ -301,15 +306,8 @@ private:
     // Click is a press & release
     bool ignoreNextSpeechEditMClick_ = false;
 
-    //CommandStack* commandStack_ = new CommandStack(this);
-
     void initialize_()
     {
-        //setAttribute(Qt::WA_StyledBackground, true);
-        //scrollArea_->setStyleSheet("background: transparent;");
-        //scrollArea_->viewport()->setStyleSheet("background: transparent;");
-        //elementsLayoutContainer_->setStyleSheet("background: transparent;");
-
         // Scroll area setup
         scrollArea_->setWidgetResizable(true);
         scrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -340,48 +338,13 @@ private:
         auto speech = element->speech().trimmed();
         if (speech.isEmpty()) return;
 
-        constexpr auto is_semantically_incomplete = [](const QString& s)
-            {
-                QString last_word = s
-                    .split(QRegularExpression("\\s+"), Qt::SkipEmptyParts)
-                    .last()
-                    .toLower();
-
-                QString cleaned{};
-
-                for (auto& c : last_word)
-                    if (!c.isPunct())
-                        cleaned.append(c);
-
-                return cleaned == "um" ||
-                    cleaned == "uh" ||
-                    cleaned == "er" ||
-                    cleaned == "erm" ||
-                    cleaned == "hm" ||
-                    cleaned == "hmm";
-            };
-
-        if (is_semantically_incomplete(speech))
+        if (Eot::endsWithFiller(speech))
         {
             element->setEot(false);
             return;
         }
 
-        // Set EOT based on whether the speech ends with terminal punctuation
-        constexpr auto is_terminal = [](const QString& s)
-            {
-                return s.endsWith('.') ||
-                    s.endsWith('!') ||
-                    s.endsWith('?') ||
-                    s.endsWith(".\"") ||
-                    s.endsWith("!\"") ||
-                    s.endsWith("?\"") ||
-                    s.endsWith(".\'") ||
-                    s.endsWith("!\'") ||
-                    s.endsWith("?\'");
-            };
-
-        element->setEot(is_terminal(speech));
+        element->setEot(Eot::hasTerminalPunc(speech));
     }
 
     LoadPlan parse_(const QJsonDocument& document)
@@ -431,20 +394,6 @@ private:
 
         root[Keys::RESULTS_ARRAY] = array;
         return QJsonDocument(root);
-    }
-
-    // Clears element and insert button container widgets
-    void clearAllWidgets_()
-    {
-        QLayoutItem* item = nullptr;
-
-        while ((item = contentLayout_->takeAt(0)) != nullptr)
-        {
-            if (auto widget = item->widget())
-                delete widget;
-
-            delete item;
-        }
     }
 
     void connectElement_(Element* element)
@@ -611,6 +560,28 @@ private:
         return elements_.indexOf(element);
     }
 
+    void deleteItemWidget_(QLayoutItem* item)
+    {
+        if (auto widget = item->widget())
+            delete widget;
+
+        delete item;
+    }
+
+    void removeContent_(int layoutIndex)
+    {
+        if (auto item = contentLayout_->takeAt(layoutIndex))
+            deleteItemWidget_(item);
+    }
+
+    void clearAllContent_()
+    {
+        QLayoutItem* item = nullptr;
+
+        while ((item = contentLayout_->takeAt(0)) != nullptr)
+            deleteItemWidget_(item);
+    }
+
 private slots:
     void onElementRoleChangeRequested_(const QString& from, const QString& to)
     {
@@ -673,29 +644,13 @@ private slots:
         auto insert_button_layout_index = (index + 1) * 2;
 
         // Remove the element widget from layout
-        auto item = contentLayout_->takeAt(element_layout_index);
-
-        if (item)
-        {
-            if (auto widget = item->widget())
-                delete widget;  // This deletes the Element widget
-
-            delete item;
-        }
+        removeContent_(element_layout_index);
 
         // Remove the trailing insert button from list
         insertButtons_.removeAt(index + 1);
 
         // Remove the trailing insert button widget from layout
-        auto button_item = contentLayout_->takeAt(insert_button_layout_index - 1); // -1 because we already removed one item
-
-        if (button_item)
-        {
-            if (auto widget = button_item->widget())
-                delete widget;  // This deletes the button container widget
-
-            delete button_item;
-        }
+        removeContent_(insert_button_layout_index - 1); // -1 because we already removed one item
 
         // Update positions of all subsequent insert buttons
         updateInsertButtonPositions_(index + 1);

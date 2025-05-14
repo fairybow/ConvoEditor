@@ -37,6 +37,7 @@
     <QtMoc Include="src\AutoSizeTextEdit.h" />
     <ClInclude Include="src\Command.h" />
     <ClInclude Include="src\CommandStack.h" />
+    <ClInclude Include="src\Eot.h" />
     <ClInclude Include="src\Io.h" />
     <ClInclude Include="src\Keys.h" />
     <ClInclude Include="src\LoadPlan.h" />

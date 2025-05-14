@@ -81,6 +81,9 @@
     <ClInclude Include="old\OLDAutoSizeTextEdit.h">
       <Filter>Old</Filter>
     </ClInclude>
+    <ClInclude Include="src\Eot.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="src\MainWindow.h">
@@ -101,5 +104,6 @@
     <QtMoc Include="src\AutoSizeTextEdit.h">
       <Filter>Source Files</Filter>
     </QtMoc>
+    <QtMoc Include="src\RoleSelector.h" />
   </ItemGroup>
 </Project>
