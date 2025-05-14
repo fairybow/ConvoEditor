@@ -500,7 +500,7 @@ private:
         );
     }
 
-    InsertButton* insertInsertButton_(int position)
+    void insertInsertButton_(int position)
     {
         auto button_container = new QWidget(contentContainer_);
 
@@ -534,8 +534,6 @@ private:
 
         // Button at position n goes at layout index n * 2
         contentLayout_->insertWidget((position * 2), button_container);
-
-        return button;
     }
 
     void updateInsertButtonPositions_(int startPosition)
