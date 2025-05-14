@@ -673,9 +673,9 @@ private slots:
 
     void onQAppFocusChanged_(QWidget* old, QWidget* now)
     {
-        constexpr auto to_edit = [](QWidget* w)
+        auto to_edit = [](QWidget* widget)
             {
-                return qobject_cast<AutoSizeTextEdit*>(w);
+                return qobject_cast<AutoSizeTextEdit*>(widget);
             };
 
         if (auto edit = to_edit(old))
