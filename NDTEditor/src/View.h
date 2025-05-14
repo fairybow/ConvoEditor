@@ -711,7 +711,7 @@ private slots:
         case Qt::Key_9: i = 8; break;
         }
 
-        if (i == -1) return;
+        if (i == -1) return; // HOWEVER, if a key was pressed we probably shouldn't continue with the split.
 
         ignoreNextSpeechEditMClick_ = true;
         split(true, qBound(0, i, (roleChoices_.count() - 1)));
