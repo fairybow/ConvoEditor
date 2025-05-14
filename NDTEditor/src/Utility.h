@@ -116,7 +116,7 @@ namespace Utility
     // Want to also handle apostrophes! Possibly, just don't do this
     // automatically. Too complex. Make a shortcut key to break with indicators
     // and add as optional parameter to split
-    inline bool isBrokenWord(const QString& beginning, const QString& end) noexcept
+    /*inline bool isBrokenWord(const QString& beginning, const QString& end) noexcept
     {
         if (beginning.isEmpty() || end.isEmpty()) return false;
 
@@ -152,7 +152,7 @@ namespace Utility
             before += indicator;
             after.prepend(indicator);
         }
-    }
+    }*/
 
     template <typename ParentWidgetT>
     inline ParentWidgetT* findParent(QWidget* widget)
