@@ -479,7 +479,7 @@ private:
             element->speechEdit(),
             &AutoSizeTextEdit::mouseChorded,
             this,
-            &View::onElementSpeechEditMouseChorded_
+            &View::onSpeechEditMouseChorded_
         );
 
         connect
@@ -688,11 +688,12 @@ private slots:
         updateInsertButtonPositions_(index + 1);
     }
 
-    void onElementSpeechEditMouseChorded_(int key)
+    // Revise (duh). We may want just a key to combo (alt + something/else) to
+    // add break indicators to beginning or end of text in field (not as part of
+    // split, because a tripart would still involve deducing the break, which is
+    // too complicated for smol bean brain
+    void onSpeechEditMouseChorded_(Qt::Key key, Qt::KeyboardModifiers modifiers) // Qt::KeyCombo or whatever it is?
     {
-        // This is definitely dumbly coded
-        if (key < 0) return;
-
         auto i = -1;
 
         // May handle other chords later
