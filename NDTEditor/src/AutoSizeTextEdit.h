@@ -13,6 +13,7 @@
 #include <QList>
 
 // Why doesn't this work with QPlainTextEdit?
+// Set max auto height to begin using scroll bar instead
 class AutoSizeTextEdit : public QTextEdit
 {
     Q_OBJECT
