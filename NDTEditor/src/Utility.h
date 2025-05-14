@@ -113,15 +113,32 @@ namespace Utility
         after.remove(0, space_end);
     }
 
+    // Want to also handle apostrophes! Possibly, just don't do this
+    // automatically. Too complex. Make a shortcut key to break with indicators
+    // and add as optional parameter to split
     inline bool isBrokenWord(const QString& beginning, const QString& end) noexcept
     {
         if (beginning.isEmpty() || end.isEmpty()) return false;
 
-        return beginning.back().isLetterOrNumber()
+        auto standard_case = beginning.back().isLetterOrNumber()
             && end.front().isLetterOrNumber();
+
+        //auto apostrophe_case = false;
+
+        //QStringList endings = { "ll", "re ", "ve", "d", "s", "m", "t" };
+
+        // Use common contradtion endings to check this:
+        // List: ll, re, ve, d, s, m, t
+        // We want to detect the following two scenarios
+        // i.e. beginning = "I'", end = "m."
+        // i.e. beginning = "I", end = "'m."
+
+        // if end starts with ' + list_item + space or punct, mark apostrophe_case true
+        // else if beginning ends with ' and end ends with any of the list items + ' ' mark apostrophe_case true
+
+        return standard_case; //|| apostrophe_case;
     }
 
-    // Want to also handle apostrophes!
     inline void applyWordBreakPunct(QString& before, QString& after, const char* indicator = "--")
     {
         // Before: "Hell"
