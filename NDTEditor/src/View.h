@@ -1,6 +1,6 @@
 #pragma once
 
-#include <algorithm>
+#include <utility>
 
 #include <QApplication>
 #include <QChar>
@@ -12,13 +12,16 @@
 #include <QLayoutItem>
 #include <QList>
 #include <QMargins>
+#include <QPoint>
 #include <QPointer>
+#include <QPropertyAnimation>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QString>
 #include <QStringList>
 #include <QTextCursor>
 #include <QTextDocumentFragment>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -132,6 +135,7 @@ public:
         auto text = currentEdit_->toPlainText();
 
         QString before_text{};
+        int scroll_to = -1;
 
         if (!has_selection && !forceTripart)
         {
@@ -153,11 +157,11 @@ public:
                 initial_element->eot()
             };
 
-            insertElement_((index + 1), item);
+            scroll_to = insertElement_(index + 1, item);
         }
         else // has_selection || forceTripart
         {
-            constexpr auto get_tripart_role =
+            auto get_tripart_role =
                 [](int role, const QStringList& roles, const QString& fallback) noexcept
                 {
                     return (role > -1)
@@ -165,14 +169,17 @@ public:
                         : fallback;
                 };
 
-            constexpr auto tripart_insert =
+            auto tripart_insert =
                 [](View* v, int insertIndex, const LoadPlan::Item& middle, const LoadPlan::Item& after) noexcept
                 {
                     // Insert the elements: after first, then middle (which puts
                     // middle between initial and after)
+
+                    // Capturing after index is pointless, because it
+                    // immediately changes
                     v->insertElement_(insertIndex, after);
                     auto middle_index = v->insertElement_(insertIndex, middle);
-                    return middle_index;
+                    return std::pair<int, int>{ middle_index, middle_index + 1 };
                 };
 
             if (!has_selection)
@@ -203,13 +210,15 @@ public:
                     initial_element->eot()
                 };
 
-                tripart_insert
+                auto indexes = tripart_insert
                 (
                     this,
                     index + 1,
                     middle_item,
                     after_item
                 );
+
+                scroll_to = indexes.second;
             }
             else // has_selection
             {
@@ -245,20 +254,22 @@ public:
                     initial_element->eot()
                 };
 
-                auto middle_index = tripart_insert
+                auto indexes = tripart_insert
                 (
-                    this, 
+                    this,
                     index + 1,
                     middle_item,
                     after_item
                 );
 
-                eotAdjust_(elements_.at(middle_index));
+                eotAdjust_(elements_.at(indexes.first));
+                scroll_to = indexes.second;
             }
         }
 
         initial_element->setSpeech(before_text);
         eotAdjust_(initial_element);
+        scrollToContent_(((scroll_to * 2) + 1) + 1); // Include the button container
     }
 
     void autoEot()
@@ -329,6 +340,34 @@ private:
             this,
             &View::onQAppFocusChanged_
         );
+    }
+
+    void scrollToContent_(int contentIndex)
+    {
+        // I hate timers.
+
+        // Use QTimer to ensure widget is laid out before scrolling. When using
+        // interval 0, the scroll doesn't work at end of document
+        QTimer::singleShot(100, this, [=]() {
+            auto scroll_bar = scrollArea_->verticalScrollBar();
+            if (!scroll_bar) return;
+
+            auto widget = contentLayout_->itemAt(contentIndex)->widget();
+            if (!widget) return;
+
+            auto widget_bottom = widget->mapTo(contentContainer_, QPoint(0, widget->height())).y();
+            auto viewport_height = scrollArea_->viewport()->height();
+            auto to = widget_bottom - viewport_height;
+            to = qBound(0, to, scroll_bar->maximum());
+            auto from = scroll_bar->value();
+
+            auto animation = new QPropertyAnimation(scroll_bar, "value");
+            animation->setDuration(300);
+            animation->setStartValue(from);
+            animation->setEndValue(to);
+            animation->setEasingCurve(QEasingCurve::OutCubic);
+            animation->start(QAbstractAnimation::DeleteWhenStopped);
+            });
     }
 
     void eotAdjust_(Element* element)
@@ -477,9 +516,6 @@ private:
 
         container_layout->addWidget(button);
 
-        // Button at position n goes at layout index n * 2
-        contentLayout_->insertWidget((position * 2), button_container);
-
         button->setText("+");
         button->setFixedSize(25, 25);
 
@@ -488,8 +524,16 @@ private:
             button,
             &InsertButton::insertRequested,
             this,
-            [&](int pos) { insertElement_(pos); }
+            [&](int pos)
+            {
+                // Need to fix element vs content vs button index :(((((
+                auto element_index = insertElement_(pos);
+                scrollToContent_(((element_index * 2) + 1) + 1); // Include the button
+            }
         );
+
+        // Button at position n goes at layout index n * 2
+        contentLayout_->insertWidget((position * 2), button_container);
 
         return button;
     }
@@ -530,6 +574,7 @@ private:
         }
     }
 
+    // Does not return a content index!
     int insertElement_(int position, const LoadPlan::Item item = {})
     {
         auto element = new Element(contentContainer_);
@@ -540,17 +585,15 @@ private:
         element->setSpeech(item.speech);
         element->setEot(item.eot);
 
-        auto element_layout_lndex = (position * 2) + 1;
+        auto element_layout_index = (position * 2) + 1;
 
-        contentLayout_->insertWidget(element_layout_lndex, element);
+        contentLayout_->insertWidget(element_layout_index, element);
         connectElement_(element);
 
         insertInsertButton_(position + 1);
         updateInsertButtonPositions_(position + 1);
 
-        // Focus new element? May want a bool, if we ever use this in a way that
-        // isn't response to user action
-
+        // Focus new element
         auto new_speech_edit = element->speechEdit();
         auto cursor = new_speech_edit->textCursor();
         cursor.movePosition(QTextCursor::End);
