@@ -112,4 +112,19 @@ namespace Utility
 
         after.remove(0, space_end);
     }
+
+    inline void showMidwordBreak(QString& before, QString& after)
+    {
+        // Before: "Hell"
+        // After: "o."
+        // Resolved: "Hell--", "--o."
+        if (before.isEmpty() || after.isEmpty()) return;
+
+        if (before.back().isLetterOrNumber()
+            && after.front().isLetterOrNumber())
+        {
+            before += "--";
+            after.prepend("--");
+        }
+    }
 }

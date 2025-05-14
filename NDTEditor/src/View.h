@@ -150,6 +150,8 @@ public:
             Utility::shiftPunct(before_text, after_text);
             if (before_text.isEmpty() || after_text.isEmpty()) return;
 
+            Utility::showMidwordBreak(before_text, after_text);
+
             // Set up the new element
             LoadPlan::Item item
             {
@@ -196,6 +198,8 @@ public:
                 Utility::shiftPunct(before_text, after_text);
                 if (before_text.isEmpty() || after_text.isEmpty()) return;
 
+                Utility::showMidwordBreak(before_text, after_text);
+
                 auto initial_role = initial_element->role();
 
                 // Set up the new elements
@@ -239,6 +243,9 @@ public:
                 Utility::shiftPunct(before_text, middle_text);
                 Utility::shiftPunct(middle_text, after_text);
                 if (before_text.isEmpty() || middle_text.isEmpty() || after_text.isEmpty()) return;
+
+                // Leave middle alone here
+                Utility::showMidwordBreak(before_text, after_text);
 
                 auto initial_role = initial_element->role();
 
