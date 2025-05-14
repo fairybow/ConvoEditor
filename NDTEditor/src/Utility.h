@@ -113,7 +113,16 @@ namespace Utility
         after.remove(0, space_end);
     }
 
-    inline void showMidwordBreak(QString& before, QString& after)
+    inline bool isBrokenWord(const QString& beginning, const QString& end) noexcept
+    {
+        if (beginning.isEmpty() || end.isEmpty()) return false;
+
+        return beginning.back().isLetterOrNumber()
+            && end.front().isLetterOrNumber();
+    }
+
+    // Want to also handle apostrophes!
+    inline void applyWordBreakPunct(QString& before, QString& after, const char* indicator = "--")
     {
         // Before: "Hell"
         // After: "o."
@@ -123,8 +132,25 @@ namespace Utility
         if (before.back().isLetterOrNumber()
             && after.front().isLetterOrNumber())
         {
-            before += "--";
-            after.prepend("--");
+            before += indicator;
+            after.prepend(indicator);
         }
+    }
+
+    template <typename ParentWidgetT>
+    inline ParentWidgetT* findParent(QWidget* widget)
+    {
+        ParentWidgetT* parent = nullptr;
+
+        for (auto w = widget; w; w = w->parentWidget())
+        {
+            if (auto next = qobject_cast<ParentWidgetT*>(w))
+            {
+                parent = next;
+                break;
+            }
+        }
+
+        return parent;
     }
 }

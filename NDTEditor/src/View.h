@@ -111,19 +111,7 @@ public:
         // Automatically adjusts EOT based on punctuation.
         if (!currentEdit_) return;
 
-        // Find the parent Element by traversing up the widget hierarchy
-        Element* initial_element = nullptr;
-
-        for (auto widget = currentEdit_->parentWidget();
-            widget; widget = widget->parentWidget())
-        {
-            if (auto next = qobject_cast<Element*>(widget))
-            {
-                initial_element = next;
-                break;
-            }
-        }
-
+        auto initial_element = Utility::findParent<Element>(currentEdit_);
         if (!initial_element) return;
 
         auto index = elements_.indexOf(initial_element);
@@ -145,14 +133,23 @@ public:
             if (position <= 0 || position >= text.length()) return;
 
             // Split the text
-            before_text = text.left(position).trimmed();
-            auto after_text = text.mid(position).trimmed();
-            Utility::shiftPunct(before_text, after_text);
+            before_text = text.left(position);
+            auto after_text = text.mid(position);
+
+            // (Hold this till after trimming)
+            auto is_broken_word = Utility::isBrokenWord(before_text, after_text);
+
+            before_text = before_text.trimmed();
+            after_text = after_text.trimmed();
+
             if (before_text.isEmpty() || after_text.isEmpty()) return;
 
-            Utility::showMidwordBreak(before_text, after_text);
+            if (is_broken_word)
+                Utility::applyWordBreakPunct(before_text, after_text);
+            else if (after_text.front().isPunct())
+                Utility::shiftPunct(before_text, after_text);
 
-            // Set up the new element
+            // Create element plan
             LoadPlan::Item item
             {
                 initial_element->role(),
@@ -193,16 +190,25 @@ public:
                 if (position <= 0 || position >= text.length()) return;
 
                 // Split the text
-                before_text = text.left(position).trimmed();
-                auto after_text = text.mid(position).trimmed();
-                Utility::shiftPunct(before_text, after_text);
+                before_text = text.left(position);
+                auto after_text = text.mid(position);
+
+                // (Hold this till after trimming)
+                auto is_broken_word = Utility::isBrokenWord(before_text, after_text);
+
+                before_text = before_text.trimmed();
+                after_text = after_text.trimmed();
+
                 if (before_text.isEmpty() || after_text.isEmpty()) return;
 
-                Utility::showMidwordBreak(before_text, after_text);
+                if (is_broken_word)
+                    Utility::applyWordBreakPunct(before_text, after_text);
+                else if (after_text.front().isPunct())
+                    Utility::shiftPunct(before_text, after_text);
 
                 auto initial_role = initial_element->role();
 
-                // Set up the new elements
+                // Create element plans
                 LoadPlan::Item middle_item
                 {
                     get_tripart_role(tripartRole, roleChoices_, initial_role),
@@ -237,19 +243,35 @@ public:
                 if (selection_start <= 0 || selection_end >= text.length()) return;
 
                 // Split the text
-                before_text = text.left(selection_start).trimmed();
-                auto middle_text = cursor.selection().toPlainText().trimmed();
-                auto after_text = text.mid(selection_end).trimmed();
-                Utility::shiftPunct(before_text, middle_text);
-                Utility::shiftPunct(middle_text, after_text);
+                before_text = text.left(selection_start);
+                auto middle_text = cursor.selection().toPlainText();
+                auto after_text = text.mid(selection_end);
+
+                // (Hold these till after trimming)
+                auto bm_broken = Utility::isBrokenWord(before_text, middle_text);
+                auto ma_broken = Utility::isBrokenWord(middle_text, after_text);
+
+                before_text = before_text.trimmed();
+                middle_text = middle_text.trimmed();
+                after_text = after_text.trimmed();
+
                 if (before_text.isEmpty() || middle_text.isEmpty() || after_text.isEmpty()) return;
 
-                // Leave middle alone here
-                Utility::showMidwordBreak(before_text, after_text);
+                if (bm_broken)
+                    Utility::applyWordBreakPunct(before_text, middle_text);
 
+                if (ma_broken)
+                    Utility::applyWordBreakPunct(middle_text, after_text);
+
+                if (!bm_broken && middle_text.front().isPunct())
+                    Utility::shiftPunct(before_text, middle_text);
+
+                if (!ma_broken && after_text.front().isPunct())
+                    Utility::shiftPunct(middle_text, after_text);
+
+                // Create element plans
                 auto initial_role = initial_element->role();
 
-                // Create middle element with selection text
                 LoadPlan::Item middle_item
                 {
                     get_tripart_role(tripartRole, roleChoices_, initial_role),
@@ -257,7 +279,6 @@ public:
                     false
                 };
 
-                // Create after element
                 LoadPlan::Item after_item
                 {
                     initial_role,

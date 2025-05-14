@@ -58,6 +58,8 @@ public:
 
     void trim()
     {
+        // Remove leading and trailing whitespace, as well as extra whitespace
+        // in-between words
         auto current = toPlainText();
         auto trimmed = current.trimmed();
 
