@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #include <QApplication>
 #include <QChar>
 #include <QComboBox>
@@ -10,6 +12,7 @@
 #include <QLayoutItem>
 #include <QList>
 #include <QPointer>
+#include <QRegularExpression>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QString>
@@ -345,15 +348,48 @@ private:
         auto speech = element->speech().trimmed();
         if (speech.isEmpty()) return;
 
+        constexpr auto is_semantically_incomplete = [](const QString& s)
+            {
+                QString last_word = s
+                    .split(QRegularExpression("\\s+"), Qt::SkipEmptyParts)
+                    .last()
+                    .toLower();
+
+                QString cleaned{};
+
+                for (const QChar& c : last_word)
+                    if (!c.isPunct())
+                        cleaned.append(c);
+
+                return cleaned == "um" ||
+                    cleaned == "uh" ||
+                    cleaned == "er" ||
+                    cleaned == "erm" ||
+                    cleaned == "hm" ||
+                    cleaned == "hmm";
+            };
+
+        if (is_semantically_incomplete(speech))
+        {
+            element->setEot(false);
+            return;
+        }
+
         // Set EOT based on whether the speech ends with terminal punctuation
-        constexpr auto set_eot = [](const QString& s)
+        constexpr auto is_terminal = [](const QString& s)
             {
                 return s.endsWith('.') ||
                     s.endsWith('!') ||
-                    s.endsWith('?');
+                    s.endsWith('?') ||
+                    s.endsWith(".\"") ||
+                    s.endsWith("!\"") ||
+                    s.endsWith("?\"") ||
+                    s.endsWith(".\'") ||
+                    s.endsWith("!\'") ||
+                    s.endsWith("?\'");
             };
 
-        element->setEot(set_eot(speech));
+        element->setEot(is_terminal(speech));
     }
 
     LoadPlan parse_(const QJsonDocument& document)
