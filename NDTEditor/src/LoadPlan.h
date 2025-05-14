@@ -48,7 +48,7 @@ public:
 
     QStringList roles() const
     {
-        return toList(roles_, Utility::Sort::Yes);
+        return Utility::toList(roles_, Utility::Sort::Yes);
     }
 
 private:

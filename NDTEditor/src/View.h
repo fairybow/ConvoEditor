@@ -357,7 +357,7 @@ private:
 
                 QString cleaned{};
 
-                for (const QChar& c : last_word)
+                for (auto& c : last_word)
                     if (!c.isPunct())
                         cleaned.append(c);
 
