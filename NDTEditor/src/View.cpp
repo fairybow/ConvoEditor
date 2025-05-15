@@ -11,6 +11,7 @@
 #include <QObject>
 #include <QPoint>
 #include <QPropertyAnimation>
+#include <QRect>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QString>
@@ -334,6 +335,18 @@ void View::scrollToContent_(int contentIndex)
 
         auto widget = contentLayout_->itemAt(contentIndex)->widget();
         if (!widget) return;
+
+        /// Testing (don't scroll if widget is already visible)
+        ///----------------------------------
+
+        auto viewport = scrollArea_->viewport();
+        auto widget_top_left = widget->mapTo(viewport, QPoint(0, 0));
+        auto widget_bottom_right = widget->mapTo(viewport, QPoint(widget->width(), widget->height()));
+        QRect viewport_rect(0, 0, viewport->width(), viewport->height());
+        QRect widget_rect(widget_top_left, widget_bottom_right);
+        if (viewport_rect.contains(widget_rect)) return;
+
+        ///----------------------------------
 
         auto widget_bottom = widget->mapTo(contentContainer_, QPoint(0, widget->height())).y();
         auto viewport_height = scrollArea_->viewport()->height();
