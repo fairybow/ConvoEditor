@@ -23,7 +23,7 @@
     <None Include="..\.gitignore" />
     <None Include="..\README.md" />
     <None Include="cpp.hint" />
-    <None Include="docs\Diagram.puml" />
+    <None Include="docs\DraftDiagram.puml" />
     <None Include="old\TestQSS.qss" />
   </ItemGroup>
   <ItemGroup>
@@ -34,7 +34,9 @@
     <ClCompile Include="src\Io.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
+    <ClCompile Include="src\RoleSelector.cpp" />
     <ClCompile Include="src\Utility.cpp" />
+    <ClCompile Include="src\View.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDAutoSizeTextEdit.h" />

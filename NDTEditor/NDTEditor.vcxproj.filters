@@ -35,7 +35,7 @@
     <None Include="cpp.hint" />
     <None Include="..\README.md" />
     <None Include="..\.gitignore" />
-    <None Include="docs\Diagram.puml">
+    <None Include="docs\DraftDiagram.puml">
       <Filter>Docs</Filter>
     </None>
     <None Include="old\TestQSS.qss">
@@ -65,6 +65,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MainWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\View.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RoleSelector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -125,6 +131,8 @@
     <QtMoc Include="src\AutoSizeTextEdit.h">
       <Filter>Source Files</Filter>
     </QtMoc>
-    <QtMoc Include="src\RoleSelector.h" />
+    <QtMoc Include="src\RoleSelector.h">
+      <Filter>Source Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

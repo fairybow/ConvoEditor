@@ -1,44 +1,18 @@
 #pragma once
 
 #include <QComboBox>
-#include <QPainter>
+#include <QObject>
 #include <QPaintEvent>
-#include <QStyleOptionComboBox>
-#include <QStylePainter>
+#include <QWidget>
 
 class RoleSelector : public QComboBox
 {
     Q_OBJECT
 
 public:
-    explicit RoleSelector(QWidget* parent = nullptr)
-        : QComboBox(parent)
-    {
-    }
+    explicit RoleSelector(QWidget* parent = nullptr);
+    virtual ~RoleSelector() override;
 
 protected:
-    virtual void paintEvent(QPaintEvent* event) override
-    {
-        QStylePainter painter(this);
-        QStyleOptionComboBox option{};
-        initStyleOption(&option);
-
-        // Draw the combobox frame, button, etc.
-        painter.drawComplexControl(QStyle::CC_ComboBox, option);
-
-        auto index = currentIndex();
-        auto display_text = currentText();
-        constexpr auto format = "(%1) %2";
-
-        if (index >= 0)
-        {
-            display_text = QString(format)
-                .arg(index + 1)
-                .arg(display_text);
-        }
-
-        // Draw label (selected text). Original model text is unchanged
-        option.currentText = display_text;
-        painter.drawControl(QStyle::CE_ComboBoxLabel, option);
-    }
+    virtual void paintEvent(QPaintEvent* event) override;
 };
