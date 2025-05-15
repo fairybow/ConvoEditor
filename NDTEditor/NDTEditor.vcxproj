@@ -27,16 +27,19 @@
     <None Include="old\TestQSS.qss" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AutoSizeTextEdit.cpp" />
+    <ClCompile Include="src\Element.cpp" />
+    <ClCompile Include="src\EotCheck.cpp" />
     <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDAutoSizeTextEdit.h" />
+    <ClInclude Include="old\OLDCommand.h" />
+    <ClInclude Include="old\OLDCommandStack.h" />
     <ClInclude Include="old\OLDElementBlock.h" />
     <QtMoc Include="src\InsertButton.h" />
     <QtMoc Include="src\EotCheck.h" />
     <QtMoc Include="src\AutoSizeTextEdit.h" />
-    <ClInclude Include="src\Command.h" />
-    <ClInclude Include="src\CommandStack.h" />
     <ClInclude Include="src\Eot.h" />
     <ClInclude Include="src\Io.h" />
     <ClInclude Include="src\Keys.h" />

@@ -46,6 +46,15 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AutoSizeTextEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Element.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EotCheck.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDElementBlock.h">
@@ -72,17 +81,17 @@
     <ClInclude Include="src\Utility.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Command.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\CommandStack.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="old\OLDAutoSizeTextEdit.h">
       <Filter>Old</Filter>
     </ClInclude>
     <ClInclude Include="src\Eot.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDCommand.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDCommandStack.h">
+      <Filter>Old</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
