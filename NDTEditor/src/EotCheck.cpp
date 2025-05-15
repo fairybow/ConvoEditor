@@ -1,4 +1,5 @@
 #include <QCheckBox>
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QWidget>
 
@@ -23,4 +24,9 @@ EotCheck::EotCheck(QWidget* parent)
         this,
         [&](bool checked) { emit toggled(checked); }
     );
+}
+
+EotCheck::~EotCheck()
+{
+    qDebug() << __FUNCTION__;
 }

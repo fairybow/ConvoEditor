@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QCheckBox>
-#include <QDebug>
 #include <QObject>
 #include <QWidget>
 
@@ -11,7 +10,7 @@ class EotCheck : public QWidget
 
 public:
     explicit EotCheck(QWidget* parent = nullptr);
-    virtual ~EotCheck() override { qDebug() << __FUNCTION__; }
+    virtual ~EotCheck() override;
 
     bool isChecked() const { return checkBox_->isChecked(); }
     void setChecked(bool checked) { checkBox_->setChecked(checked); }

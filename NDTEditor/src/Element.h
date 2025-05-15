@@ -30,7 +30,7 @@ class Element : public QWidget
 
 public:
     explicit Element(QWidget* parent = nullptr);
-    virtual ~Element() override { qDebug() << __FUNCTION__; }
+    virtual ~Element() override;
 
     QString role() const { return roleSelector_->currentText(); }
     void setRole(const QString& role) { roleSelector_->setCurrentText(role); }

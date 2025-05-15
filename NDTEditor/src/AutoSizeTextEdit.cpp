@@ -1,4 +1,5 @@
 #include <QChar>
+#include <QDebug>
 #include <QKeyEvent>
 #include <QList>
 #include <QMargins>
@@ -51,6 +52,11 @@ AutoSizeTextEdit::AutoSizeTextEdit(QWidget* parent)
 
     // Set initial height
     updateHeight_();
+}
+
+AutoSizeTextEdit::~AutoSizeTextEdit()
+{
+    qDebug() << __FUNCTION__;
 }
 
 void AutoSizeTextEdit::simplify()

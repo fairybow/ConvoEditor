@@ -30,7 +30,11 @@
     <ClCompile Include="src\AutoSizeTextEdit.cpp" />
     <ClCompile Include="src\Element.cpp" />
     <ClCompile Include="src\EotCheck.cpp" />
+    <ClCompile Include="src\InsertButton.cpp" />
+    <ClCompile Include="src\Io.cpp" />
     <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\MainWindow.cpp" />
+    <ClCompile Include="src\Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDAutoSizeTextEdit.h" />

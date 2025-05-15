@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -13,6 +14,11 @@ Element::Element(QWidget* parent)
     : QWidget(parent)
 {
     initialize_();
+}
+
+Element::~Element()
+{
+    qDebug() << __FUNCTION__;
 }
 
 void Element::initialize_()

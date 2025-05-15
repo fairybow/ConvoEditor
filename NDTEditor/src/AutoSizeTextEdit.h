@@ -17,6 +17,7 @@ class AutoSizeTextEdit : public QTextEdit
 
 public:
     explicit AutoSizeTextEdit(QWidget* parent = nullptr);
+    virtual ~AutoSizeTextEdit() override;
 
     void simplify();
 
