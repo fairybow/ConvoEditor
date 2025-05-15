@@ -11,6 +11,7 @@
 
 namespace Utility
 {
+    // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
     QList<QColor> phiColors(int count, const QColor& startColor)
     {
         // Try cached:
