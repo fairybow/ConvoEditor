@@ -11,20 +11,41 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="resources\NDTEditor.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtRcc Include="resources\NDTEditor.qrc" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="resources\NDTEditor.rc" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="..\.gitignore" />
     <None Include="..\README.md" />
     <None Include="cpp.hint" />
     <None Include="docs\DraftDiagram.puml" />
     <None Include="old\TestQSS.qss" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDAutoSizeTextEdit.h" />
+    <ClInclude Include="old\OLDCommand.h" />
+    <ClInclude Include="old\OLDCommandStack.h" />
+    <ClInclude Include="old\OLDElementBlock.h" />
+    <ClInclude Include="old\OLDJsonModel.h" />
+    <ClInclude Include="old\OLDJsonView.h" />
+    <ClInclude Include="old\OLDMainWindow.h" />
+    <ClInclude Include="src\Eot.h" />
+    <ClInclude Include="src\Io.h" />
+    <ClInclude Include="src\Keys.h" />
+    <ClInclude Include="src\LoadPlan.h" />
+    <ClInclude Include="src\Utility.h" />
+    <QtMoc Include="src\View.h" />
+    <QtMoc Include="src\RoleSelector.h" />
+    <QtMoc Include="src\MainWindow.h" />
+    <QtMoc Include="src\InsertButton.h" />
+    <QtMoc Include="src\EotCheck.h" />
+    <QtMoc Include="src\Element.h" />
+    <QtMoc Include="src\AutoSizeTextEdit.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\ConvoEditor.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="resources\ConvoEditor.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\ConvoEditor.rc" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\AutoSizeTextEdit.cpp" />
@@ -38,35 +59,8 @@
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\View.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="old\OLDAutoSizeTextEdit.h" />
-    <ClInclude Include="old\OLDCommand.h" />
-    <ClInclude Include="old\OLDCommandStack.h" />
-    <ClInclude Include="old\OLDElementBlock.h" />
-    <QtMoc Include="src\InsertButton.h" />
-    <QtMoc Include="src\EotCheck.h" />
-    <QtMoc Include="src\AutoSizeTextEdit.h" />
-    <ClInclude Include="src\Eot.h" />
-    <ClInclude Include="src\Io.h" />
-    <ClInclude Include="src\Keys.h" />
-    <ClInclude Include="src\LoadPlan.h" />
-    <QtMoc Include="src\RoleSelector.h" />
-    <ClInclude Include="src\Utility.h" />
-    <QtMoc Include="src\Element.h" />
-    <QtMoc Include="src\MainWindow.h" />
-    <QtMoc Include="src\View.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="old\OLDJsonModel.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="old\OLDJsonView.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="old\OLDMainWindow.h" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{921B71DF-6235-43B1-A6E8-02B7C854A975}</ProjectGuid>
+    <ProjectGuid>{1192EAF5-88D0-45E7-AAAA-8FB8A75E91D3}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>

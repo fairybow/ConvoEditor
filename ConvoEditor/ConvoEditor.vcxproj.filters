@@ -1,0 +1,136 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{73b95169-c0b1-4dfd-a4d2-a46169bf5e98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Old">
+      <UniqueIdentifier>{fa542067-3f24-4d9c-ba1c-10015bbdd9b3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{bb0532ed-b951-40d3-9d05-ce5666c9c9e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{6cea7880-6c40-4b78-9cf2-e169945c839c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="docs\DraftDiagram.puml">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="old\TestQSS.qss">
+      <Filter>Old</Filter>
+    </None>
+    <None Include="cpp.hint" />
+    <None Include="..\.gitignore" />
+    <None Include="..\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="old\OLDAutoSizeTextEdit.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDCommand.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDCommandStack.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDElementBlock.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDJsonModel.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDJsonView.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="old\OLDMainWindow.h">
+      <Filter>Old</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Eot.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Io.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Keys.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LoadPlan.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utility.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="resources\ConvoEditor.ico">
+      <Filter>Resources</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="resources\ConvoEditor.qrc">
+      <Filter>Resources</Filter>
+    </QtRcc>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="resources\ConvoEditor.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\AutoSizeTextEdit.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Element.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\EotCheck.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\InsertButton.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Io.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MainWindow.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RoleSelector.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utility.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\View.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="src\AutoSizeTextEdit.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+    <QtMoc Include="src\Element.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+    <QtMoc Include="src\EotCheck.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+    <QtMoc Include="src\InsertButton.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+    <QtMoc Include="src\MainWindow.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+    <QtMoc Include="src\RoleSelector.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+    <QtMoc Include="src\View.h">
+      <Filter>Source</Filter>
+    </QtMoc>
+  </ItemGroup>
+</Project>
