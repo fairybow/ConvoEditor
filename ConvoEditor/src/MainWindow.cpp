@@ -9,12 +9,12 @@
 #include <QUrl>
 #include <QWidget>
 
+#include "Coco/Path.h"
+
 #include "MainWindow.h"
 #include "View.h"
 
 /// For testing:
-#include <QDir>
-#include <QStandardPaths>
 #include <QTimer>
 
 MainWindow::MainWindow(QWidget* parent)
@@ -23,8 +23,8 @@ MainWindow::MainWindow(QWidget* parent)
     initialize_();
 
     /// For testing
-    auto path = QDir(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation)).filePath("test.json");
-    QTimer::singleShot(1000, this, [=] { view_->load(path); });
+    auto test_path = Coco::Path::Desktop("test.json");
+    QTimer::singleShot(1000, this, [=] { view_->load(test_path); });
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)

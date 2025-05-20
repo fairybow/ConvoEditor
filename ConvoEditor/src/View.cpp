@@ -23,11 +23,15 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Coco/Io.h"
+#include "Coco/Layout.h"
+#include "Coco/Path.h"
+#include "Coco/Utility.h"
+
 #include "AutoSizeTextEdit.h"
 #include "Element.h"
 #include "Eot.h"
 #include "InsertButton.h"
-#include "Io.h"
 #include "LoadPlan.h"
 #include "Utility.h"
 #include "View.h"
@@ -60,9 +64,9 @@ View::~View()
     qDebug() << __FUNCTION__;
 }
 
-bool View::load(const QString& path)
+bool View::load(const Coco::Path& path)
 {
-    auto document = Io::read(path);
+    auto document = Coco::Io::Json::read(path);
     if (document.isNull()) return false;
 
     // No errors, so loading will proceed
@@ -102,7 +106,7 @@ bool View::save()
     auto document = compile_();
     if (document.isNull()) return false;
 
-    return Io::write(document, currentPath_);
+    return Coco::Io::Json::write(document, currentPath_);
 }
 
 void View::split(bool forceTripart, int tripartRole)
@@ -120,7 +124,7 @@ void View::split(bool forceTripart, int tripartRole)
     // Automatically adjusts EOT based on punctuation.
     if (!currentEdit_) return;
 
-    auto initial_element = Utility::findParent<Element>(currentEdit_);
+    auto initial_element = Coco::findParent<Element>(currentEdit_);
     if (!initial_element) return;
 
     auto index = elements_.indexOf(initial_element);
@@ -309,8 +313,8 @@ void View::initialize_()
     // Set up layouts
     // Align center causes widgets to take up their preferred size rather
     // than stretching to fill the available width
-    mainLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(this, Qt::AlignCenter);
-    contentLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>(contentContainer_, Qt::AlignCenter);
+    mainLayout_ = Coco::Layout::zeroPadded<QVBoxLayout>(this, Qt::AlignCenter);
+    contentLayout_ = Coco::Layout::zeroPadded<QVBoxLayout>(contentContainer_, Qt::AlignCenter);
 
     mainLayout_->addWidget(scrollArea_);
 
@@ -497,7 +501,7 @@ void View::insertInsertButton_(int position)
 {
     auto button_container = new QWidget(contentContainer_);
 
-    auto container_layout = Utility::newLayout<QHBoxLayout>
+    auto container_layout = Coco::Layout::make<QHBoxLayout>
         (
             { 1, 6, 1, 6 }, 0,
             button_container,
@@ -591,7 +595,7 @@ void View::onElementRoleChangeRequested_(const QString& from, const QString& to)
 {
     roleChoices_.removeAll(from);
     roleChoices_ << to;
-    Utility::sort(roleChoices_);
+    Coco::Utility::sort(roleChoices_);
 
     for (auto i = 0; i < elements_.count(); ++i)
     {
@@ -608,7 +612,7 @@ void View::onElementRoleChangeRequested_(const QString& from, const QString& to)
 void View::onElementRoleAddRequested_(const QString& role)
 {
     roleChoices_ << role;
-    Utility::sort(roleChoices_);
+    Coco::Utility::sort(roleChoices_);
 
     for (auto i = 0; i < elements_.count(); ++i)
     {

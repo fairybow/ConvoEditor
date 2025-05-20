@@ -16,6 +16,9 @@
     <None Include="cpp.hint" />
     <None Include="docs\DraftDiagram.puml" />
     <None Include="old\TestQSS.qss" />
+    <None Include="submodules\Coco\Coco\scripts\DevWinUpdateFromConsumer.bat" />
+    <None Include="submodules\Coco\Coco\scripts\WinGitRootUnused.bat" />
+    <None Include="submodules\Coco\Coco\scripts\WinUpdateSubmodules.bat" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDAutoSizeTextEdit.h" />
@@ -26,10 +29,19 @@
     <ClInclude Include="old\OLDJsonView.h" />
     <ClInclude Include="old\OLDMainWindow.h" />
     <ClInclude Include="src\Eot.h" />
-    <ClInclude Include="src\Io.h" />
     <ClInclude Include="src\Keys.h" />
     <ClInclude Include="src\LoadPlan.h" />
     <ClInclude Include="src\Utility.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Bool.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Fx.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Global.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Io.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Layout.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Macros.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Path.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\PathUtil.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Private.h" />
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Utility.h" />
     <QtMoc Include="src\View.h" />
     <QtMoc Include="src\RoleSelector.h" />
     <QtMoc Include="src\MainWindow.h" />
@@ -52,12 +64,15 @@
     <ClCompile Include="src\Element.cpp" />
     <ClCompile Include="src\EotCheck.cpp" />
     <ClCompile Include="src\InsertButton.cpp" />
-    <ClCompile Include="src\Io.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\MainWindow.cpp" />
     <ClCompile Include="src\RoleSelector.cpp" />
     <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\View.cpp" />
+    <ClCompile Include="submodules\Coco\Coco\src\Fx.cpp" />
+    <ClCompile Include="submodules\Coco\Coco\src\Io.cpp" />
+    <ClCompile Include="submodules\Coco\Coco\src\Path.cpp" />
+    <ClCompile Include="submodules\Coco\Coco\src\PathUtil.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1192EAF5-88D0-45E7-AAAA-8FB8A75E91D3}</ProjectGuid>
@@ -115,11 +130,13 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)submodules\Coco\Coco\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)submodules\Coco\Coco\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">

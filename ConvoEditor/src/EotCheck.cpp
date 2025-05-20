@@ -3,8 +3,9 @@
 #include <QHBoxLayout>
 #include <QWidget>
 
+#include "Coco/Layout.h"
+
 #include "EotCheck.h"
-#include "Utility.h"
 
 EotCheck::EotCheck(QWidget* parent)
     : QWidget(parent)
@@ -14,7 +15,7 @@ EotCheck::EotCheck(QWidget* parent)
     checkBox_->setLayoutDirection(Qt::RightToLeft);
     checkBox_->setText("End of turn:");
 
-    auto layout = Utility::zeroPaddedLayout<QHBoxLayout>(this, Qt::AlignCenter);
+    auto layout = Coco::Layout::zeroPadded<QHBoxLayout>(this, Qt::AlignCenter);
     layout->addWidget(checkBox_);
 
     connect

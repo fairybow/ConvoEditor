@@ -4,11 +4,12 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Coco/Layout.h"
+
 #include "AutoSizeTextEdit.h"
 #include "Element.h"
 #include "EotCheck.h"
 #include "RoleSelector.h"
-#include "Utility.h"
 
 Element::Element(QWidget* parent)
     : QWidget(parent)
@@ -49,10 +50,10 @@ void Element::initialize_()
     speechEdit_->installEventFilter(this);
 
     // Set up layouts
-    mainLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>(this);
-    controlLayout_ = Utility::zeroPaddedLayout<QVBoxLayout>();
-    topLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
-    bottomLayout_ = Utility::zeroPaddedLayout<QHBoxLayout>();
+    mainLayout_ = Coco::Layout::zeroPadded<QHBoxLayout>(this);
+    controlLayout_ = Coco::Layout::zeroPadded<QVBoxLayout>();
+    topLayout_ = Coco::Layout::zeroPadded<QHBoxLayout>();
+    bottomLayout_ = Coco::Layout::zeroPadded<QHBoxLayout>();
 
     topLayout_->addWidget(editRole_, 0);
     topLayout_->addWidget(addRole_, 0);

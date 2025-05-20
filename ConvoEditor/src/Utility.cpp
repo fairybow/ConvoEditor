@@ -1,8 +1,4 @@
-#include <cmath>
-#include <numbers>
-
 #include <QChar>
-#include <QColor>
 #include <QList>
 #include <QString>
 #include <QtTypes>
@@ -11,47 +7,6 @@
 
 namespace Utility
 {
-    // https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-    QList<QColor> phiColors(int count, const QColor& startColor)
-    {
-        // Try cached:
-        static auto last_count = 0;
-        static QColor last_start_color = Qt::red;
-        static QList<QColor> cached{};
-
-        if (count == last_count
-            && startColor == last_start_color
-            && !cached.isEmpty())
-            return cached;
-
-        // Otherwise:
-        QList<QColor> result{};
-        if (count < 1) return result;
-
-        double h = startColor.hsvHueF();
-
-        // Different levels for variety
-        QList<double> saturations = { 0.9, 0.7, 0.8 };
-        QList<double> values = { 0.9, 0.8, 0.95 };
-
-        constexpr double conjugate = 1.0 / std::numbers::phi;
-
-        for (auto i = 0; i < count; ++i)
-        {
-            // Select saturation and value based on position
-            double s = saturations[i % saturations.size()];
-            double v = values[i % values.size()];
-
-            result << QColor::fromHsvF(h, s, v);
-
-            // Advance hue by golden ratio conjugate and keep in range [0, 1)
-            h += conjugate;
-            h = std::fmod(h, 1.0);
-        }
-
-        return result;
-    }
-
     void shiftPunct(QString& before, QString& after)
     {
         // Before: "This is before"

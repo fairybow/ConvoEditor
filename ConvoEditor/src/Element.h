@@ -15,6 +15,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Coco/Fx.h"
+
 #include "AutoSizeTextEdit.h"
 #include "EotCheck.h"
 #include "RoleSelector.h"
@@ -45,7 +47,7 @@ public:
     void setRoleChoices(const QStringList& roles)
     {
         roleSelector_->clear();
-        visualCueColors_ = Utility::phiColors(roles.count());
+        visualCueColors_ = Coco::Fx::goldenRatioColors(roles.count());
         roleSelector_->addItems(roles);
     }
 

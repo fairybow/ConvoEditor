@@ -8,8 +8,9 @@
 #include <QString>
 #include <QStringList>
 
+#include "Coco/Utility.h"
+
 #include "Keys.h"
-#include "Utility.h"
 
 class LoadPlan
 {
@@ -49,7 +50,7 @@ public:
 
     QStringList roles() const
     {
-        return Utility::toList(roles_, Utility::Sort::Yes);
+        return Coco::Utility::toList(roles_, Coco::Sort::Yes);
     }
 
 private:

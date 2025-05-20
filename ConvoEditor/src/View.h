@@ -11,6 +11,8 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Coco/Path.h"
+
 #include "AutoSizeTextEdit.h"
 #include "Element.h"
 #include "InsertButton.h"
@@ -37,7 +39,7 @@ public:
             eotAdjust_(element);
     }
 
-    bool load(const QString& path);
+    bool load(const Coco::Path& path);
     bool save();
     void split(bool forceTripart = false, int tripartRole = -1);
 
@@ -54,7 +56,7 @@ private:
     QList<InsertButton*> insertButtons_{};
     QList<QString> roleChoices_{};
 
-    QString currentPath_{};
+    Coco::Path currentPath_{};
     QPointer<AutoSizeTextEdit> currentEdit_{};
 
     // Click is a press & release

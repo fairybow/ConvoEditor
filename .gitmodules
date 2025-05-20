@@ -1,0 +1,3 @@
+[submodule "ConvoEditor/submodules/Coco"]
+	path = ConvoEditor/submodules/Coco
+	url = https://github.com/fairybow/Coco

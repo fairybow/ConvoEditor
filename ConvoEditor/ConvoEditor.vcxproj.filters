@@ -13,6 +13,12 @@
     <Filter Include="Source">
       <UniqueIdentifier>{6cea7880-6c40-4b78-9cf2-e169945c839c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Submodules">
+      <UniqueIdentifier>{a1a757f0-5cba-4e2e-8ff4-4ad7e2cacd25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Submodules\Coco">
+      <UniqueIdentifier>{01b8fb46-00ca-45f0-aec0-6fec598bb1fa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="docs\DraftDiagram.puml">
@@ -24,6 +30,15 @@
     <None Include="cpp.hint" />
     <None Include="..\.gitignore" />
     <None Include="..\README.md" />
+    <None Include="submodules\Coco\Coco\scripts\WinGitRootUnused.bat">
+      <Filter>Submodules\Coco</Filter>
+    </None>
+    <None Include="submodules\Coco\Coco\scripts\WinUpdateSubmodules.bat">
+      <Filter>Submodules\Coco</Filter>
+    </None>
+    <None Include="submodules\Coco\Coco\scripts\DevWinUpdateFromConsumer.bat">
+      <Filter>Submodules\Coco</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="old\OLDAutoSizeTextEdit.h">
@@ -50,9 +65,6 @@
     <ClInclude Include="src\Eot.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="src\Io.h">
-      <Filter>Source</Filter>
-    </ClInclude>
     <ClInclude Include="src\Keys.h">
       <Filter>Source</Filter>
     </ClInclude>
@@ -61,6 +73,36 @@
     </ClInclude>
     <ClInclude Include="src\Utility.h">
       <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Bool.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Fx.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Global.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Io.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Layout.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Macros.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Path.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\PathUtil.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Private.h">
+      <Filter>Submodules\Coco</Filter>
+    </ClInclude>
+    <ClInclude Include="submodules\Coco\Coco\include\Coco\Utility.h">
+      <Filter>Submodules\Coco</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -91,9 +133,6 @@
     <ClCompile Include="src\InsertButton.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="src\Io.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="src\Main.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -108,6 +147,18 @@
     </ClCompile>
     <ClCompile Include="src\View.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\Coco\Coco\src\Fx.cpp">
+      <Filter>Submodules\Coco</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\Coco\Coco\src\Io.cpp">
+      <Filter>Submodules\Coco</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\Coco\Coco\src\Path.cpp">
+      <Filter>Submodules\Coco</Filter>
+    </ClCompile>
+    <ClCompile Include="submodules\Coco\Coco\src\PathUtil.cpp">
+      <Filter>Submodules\Coco</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
