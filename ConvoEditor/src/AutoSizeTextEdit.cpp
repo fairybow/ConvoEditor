@@ -194,8 +194,13 @@ void AutoSizeTextEdit::keyPressEvent(QKeyEvent* event)
 
 void AutoSizeTextEdit::updateHeight_()
 {
-    // There's some extra space below the text. However, for now, it seems
-    // preventing scrolling makes this not an issue
+    // Only calculate document size when content actually changes, otherwise
+    // we'll get a lof memory usage with repeat scrolling
+    static auto last_text_length = 0;
+    auto current_text_length = toPlainText().length();
+    if (last_text_length == current_text_length) return;
+
+    last_text_length = current_text_length;
 
     // Get the document's size for the current width
     auto doc_size = document()->size().toSize();
